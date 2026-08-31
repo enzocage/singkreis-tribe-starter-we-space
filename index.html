@@ -354,6 +354,31 @@
     </div>
   </div>
 
+  <!-- ==================== LÖSCHEN CONFIRMATION OVERLAY MODAL ==================== -->
+  <div id="deleteConfirmModal" class="fixed inset-0 z-[150] bg-stone-950/90 backdrop-blur-md hidden flex items-center justify-center p-4 select-none" onclick="closeDeleteConfirmModal()">
+    <div class="relative max-w-sm w-full bg-stone-900 border-2 border-rose-500/60 rounded-2xl shadow-2xl p-5 text-stone-100 animate-scale-up text-center" onclick="event.stopPropagation()">
+      <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 font-bold flex items-center justify-center text-2xl mx-auto mb-3 shadow">
+        🗑️
+      </div>
+      <h3 class="text-base font-black text-white leading-tight">Song für alle löschen?</h3>
+      <p id="deleteSongTargetTitle" class="text-xs font-bold text-amber-400 mt-1 mb-3 truncate">Songtitel</p>
+      
+      <div class="bg-rose-950/60 border border-rose-500/40 rounded-xl p-3.5 mb-4 text-xs text-rose-200 text-left flex items-start gap-2.5 shadow-inner">
+        <span class="text-base shrink-0">⚠️</span>
+        <p class="font-semibold leading-snug">Bist du sicher, der Song wird aus der öffentlichen Liste für alle gelöscht!</p>
+      </div>
+
+      <div class="flex items-center justify-center gap-2">
+        <button type="button" onclick="closeDeleteConfirmModal()" class="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold rounded-xl text-xs flex-1 transition">
+          Abbrechen
+        </button>
+        <button type="button" id="confirmDeleteBtn" onclick="executeDeleteCommunitySong()" class="px-4 py-2.5 bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-black rounded-xl text-xs flex-1 transition shadow-lg active:scale-95">
+          🗑️ Ja, für alle löschen
+        </button>
+      </div>
+    </div>
+  </div>
+
   
   <!-- ==================== MANTRAS & HEILSAME LIEDER MODAL ==================== -->
   <div id="mantrasModal" class="fixed inset-0 z-[125] bg-stone-950/95 backdrop-blur-md hidden flex flex-col justify-between p-2 sm:p-4 overflow-hidden" onclick="closeMantrasModal()">
@@ -2250,9 +2275,31 @@
       }
     }
 
-    async function deleteCommunitySong(id) {
-      if (!confirm("Diesen Community-Song wirklich entfernen?")) return;
-      
+    let pendingDeleteSongId = null;
+
+    function promptDeleteCommunitySong(id) {
+      pendingDeleteSongId = id;
+      const all = getAllSongs();
+      const song = all.find(s => s.id === id);
+      const titleEl = document.getElementById("deleteSongTargetTitle");
+      if (titleEl) {
+        titleEl.textContent = song ? `"${song.title}" (${song.artist})` : "Ausgewählter Song";
+      }
+      const modal = document.getElementById("deleteConfirmModal");
+      if (modal) modal.classList.remove("hidden");
+    }
+
+    function closeDeleteConfirmModal() {
+      pendingDeleteSongId = null;
+      const modal = document.getElementById("deleteConfirmModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    async function executeDeleteCommunitySong() {
+      if (!pendingDeleteSongId) return;
+      const id = pendingDeleteSongId;
+      closeDeleteConfirmModal();
+
       let comm = getCommunitySongs().filter(s => s.id !== id);
       firebaseCommunitySongs = comm;
       localStorage.setItem("singkreis_community_songs", JSON.stringify(comm));
@@ -2265,7 +2312,7 @@
         }
       }
 
-      showToast("Community-Song entfernt");
+      showToast("🗑️ Song aus der öffentlichen Liste gelöscht");
       renderSongList();
     }
 
@@ -2414,7 +2461,7 @@
               ${isFav ? '<span class="text-rose-500">♥</span>' : '♡'}
             </button>
             ${isCommunity ? `
-              <button onclick="event.stopPropagation(); deleteCommunitySong('${song.id}')" class="p-1.5 text-stone-500 hover:text-rose-400 active:text-rose-500 text-sm transition" title="Community-Song entfernen">
+              <button onclick="event.stopPropagation(); promptDeleteCommunitySong('${song.id}')" class="p-1.5 text-stone-500 hover:text-rose-400 active:text-rose-500 text-sm transition" title="Community-Song entfernen">
                 🗑️
               </button>
             ` : ''}
