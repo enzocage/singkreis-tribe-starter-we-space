@@ -552,7 +552,7 @@
     </div>
 
     <!-- 2. Werkzeugleiste: SCROLL & AKKORDE LINKS, DANN TONART, TEXTGRÖSSE & DARK MODE -->
-    <div class="bg-amber-500 text-stone-950 px-2 py-1.5 border-b border-amber-600 flex items-center justify-between gap-1.5 text-xs shrink-0 select-none shadow-sm no-print overflow-x-auto no-scrollbar">
+    <div id="songControlBar" class="bg-amber-500 text-stone-950 px-2.5 py-1.5 border-b border-amber-600 flex items-center justify-between gap-2 text-xs shrink-0 select-none shadow-sm no-print overflow-x-auto no-scrollbar scroll-smooth">
       
       <!-- LINKS: Auto-Scroll & Akkorde Ein/Aus -->
       <div class="flex items-center gap-1.5 shrink-0">
@@ -593,7 +593,7 @@
     </div>
 
     <!-- 3. Songtext & Akkorde (NIMMT 90% DES BILDSCHIRMS EIN) -->
-    <div class="flex-1 overflow-y-auto px-3.5 py-4 bg-amber-50/40 text-stone-950" id="modalScrollArea">
+    <div class="flex-1 overflow-y-auto px-3.5 py-4 bg-amber-50/40 text-stone-950 pb-16" id="modalScrollArea">
       
       <!-- Botschaft / Thema -->
       <div id="modalCoreMessage" class="mb-4 text-xs sm:text-sm font-semibold text-amber-950 bg-amber-200/70 px-3 py-1.5 rounded-lg border-l-4 border-amber-600 leading-snug">
@@ -611,19 +611,6 @@
         <div id="modalChordsBadgeList" class="flex flex-wrap gap-1.5"></div>
       </div>
 
-    </div>
-
-    <!-- 4. Floating Schnelltasten am unteren Rand -->
-    <div class="bg-stone-950/95 backdrop-blur border-t border-stone-800 p-2 flex items-center justify-between text-xs text-stone-400 no-print">
-      <div class="flex items-center gap-2">
-        <span id="modalTempo" class="font-mono font-bold text-amber-400">80 BPM</span>
-        <button id="metroBtn" onclick="toggleMetronome()" class="px-2 py-1 rounded bg-stone-900 border border-stone-700 text-stone-200 font-bold text-[11px] flex items-center gap-1">
-          <span id="metroIcon">▶</span> Klick
-        </button>
-      </div>
-      <button onclick="copySongText()" class="px-2.5 py-1 rounded bg-stone-900 border border-stone-700 text-stone-300 font-bold hover:text-white">
-        📋 Kopieren
-      </button>
     </div>
 
   </div>
@@ -2552,7 +2539,8 @@
       applyDarkModeUI();
       document.getElementById("modalTitle").textContent = activeSong.title;
       document.getElementById("modalArtist").textContent = `${activeSong.artist} (${activeSong.year})`;
-      document.getElementById("modalTempo").textContent = `${activeSong.tempo} BPM`;
+      const tempoEl = document.getElementById("modalTempo");
+      if (tempoEl) tempoEl.textContent = `${activeSong.tempo} BPM`;
       document.getElementById("modalCoreMessage").textContent = `💡 ${activeSong.message}`;
 
       updateModalFavButton();
@@ -2565,6 +2553,17 @@
       document.getElementById("songModal").classList.remove("hidden");
       document.body.style.overflow = "hidden";
       document.getElementById("modalScrollArea").scrollTop = 0;
+
+      // Einmal die gelbe Leiste nach rechts und links scrollen als visueller Hinweis
+      setTimeout(() => {
+        const bar = document.getElementById("songControlBar");
+        if (bar && bar.scrollWidth > bar.clientWidth) {
+          bar.scrollTo({ left: 120, behavior: 'smooth' });
+          setTimeout(() => {
+            bar.scrollTo({ left: 0, behavior: 'smooth' });
+          }, 450);
+        }
+      }, 300);
     }
 
     function closeModal() {
