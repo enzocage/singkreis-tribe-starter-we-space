@@ -113,8 +113,8 @@
 </head>
 <body class="bg-stone-900 text-stone-100 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
 
-  <!-- ==================== 1-SEKUNDE SPLASH SCREEN (GROSSES BILD OHNE QR-CODE) ==================== -->
-  <div id="splashScreen" class="fixed inset-0 z-[100] bg-stone-950 flex flex-col items-center justify-center p-4 transition-opacity duration-500 ease-out select-none">
+  <!-- ==================== 3-SEKUNDEN SPLASH SCREEN (GROSSES BILD MIT INTRO-AUDIO) ==================== -->
+  <div id="splashScreen" class="fixed inset-0 z-[100] bg-stone-950 flex flex-col items-center justify-center p-4 transition-opacity duration-500 ease-out select-none cursor-pointer" onclick="dismissSplashScreen()">
     <div class="flex flex-col items-center text-center">
       <div class="relative mb-4">
         <div class="absolute -inset-2 rounded-3xl bg-gradient-to-r from-amber-500 to-amber-700 opacity-60 blur-2xl animate-pulse"></div>
@@ -2246,6 +2246,38 @@
       setTimeout(() => location.reload(), 500);
     }
 
+    function playIntroAudio() {
+      try {
+        const audio = new Audio("intro.mp3");
+        audio.volume = 0.85;
+        const p = audio.play();
+        if (p !== undefined) {
+          p.catch((err) => {
+            console.log("Intro audio autoplay awaiting user gesture:", err);
+            const playOnce = () => {
+              audio.play().catch(() => {});
+              document.removeEventListener("click", playOnce);
+              document.removeEventListener("touchstart", playOnce);
+            };
+            document.addEventListener("click", playOnce, { once: true });
+            document.addEventListener("touchstart", playOnce, { once: true });
+          });
+        }
+      } catch (e) {
+        console.warn("Intro audio:", e);
+      }
+    }
+
+    function dismissSplashScreen() {
+      const splash = document.getElementById("splashScreen");
+      if (splash && splash.style.display !== "none") {
+        splash.style.opacity = "0";
+        setTimeout(() => {
+          splash.style.display = "none";
+        }, 500);
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       applyDarkModeUI();
       renderSongList();
@@ -2254,16 +2286,13 @@
       initScrollSpeedGestureListeners();
       initPinchToZoomListeners();
 
-      // 1 Sekunde groß anzeigen beim Starten der App
+      // Intro-Audio abspielen
+      playIntroAudio();
+
+      // 3 Sekunden groß anzeigen beim Starten der App
       setTimeout(() => {
-        const splash = document.getElementById("splashScreen");
-        if (splash) {
-          splash.style.opacity = "0";
-          setTimeout(() => {
-            splash.style.display = "none";
-          }, 500);
-        }
-      }, 1000);
+        dismissSplashScreen();
+      }, 3000);
     });
 
     function getCommunitySongs() {
