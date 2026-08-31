@@ -675,6 +675,11 @@
           <button onclick="toggleChordsQuick()" id="quickChordToggleBtn" class="px-2.5 py-1 rounded-lg bg-stone-950 text-amber-400 font-bold text-xs">
             Chords: AN
           </button>
+
+          <!-- Screen Always On Button -->
+          <button onclick="openScreenTimeoutTipModal()" class="px-2 py-1 rounded-lg bg-stone-950/80 hover:bg-stone-950 text-amber-300 font-bold text-xs flex items-center gap-1 cursor-pointer border border-stone-800" title="Display dauerhaft anlassen (Screen Always-On & Timeout-Tipp)">
+            <span>☀️</span> <span class="hidden sm:inline">Screen On</span>
+          </button>
         </div>
 
         <!-- RECHTS: Textgröße, Dark Mode & Tonart ganz rechts -->
@@ -742,8 +747,20 @@
         </button>
       </div>
 
+      <!-- Winziger transparenter Screen Always-On Button im Tempo-Widget -->
+      <button type="button" onclick="event.stopPropagation(); openScreenTimeoutTipModal()" class="text-amber-400/80 hover:text-amber-300 text-[10px] px-1.5 py-1 rounded-lg bg-stone-900/60 hover:bg-stone-900 border border-stone-700/50 cursor-pointer font-bold transition flex items-center gap-0.5" title="Screen Always-On & Timeout-Tipp">
+        <span>☀️</span><span class="hidden sm:inline text-[9px]">Always On</span>
+      </button>
+
       <button type="button" onclick="event.stopPropagation(); hideScrollSpeedWidget()" class="text-stone-400 hover:text-white text-xs px-1.5 py-0.5 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-700 ml-0.5 cursor-pointer font-bold transition flex items-center justify-center" title="Schließen">
         ✕
+      </button>
+    </div>
+
+    <!-- Winziger transparenter Screen Always-On Button unten links im Notenständer -->
+    <div class="fixed bottom-6 left-4 z-[110] opacity-30 hover:opacity-100 transition duration-300 select-none">
+      <button type="button" onclick="openScreenTimeoutTipModal()" class="px-2 py-1 bg-stone-950/60 hover:bg-stone-950/90 border border-stone-700/40 hover:border-amber-500/70 text-stone-300 hover:text-amber-300 font-mono font-bold text-[10px] rounded-full backdrop-blur-sm shadow flex items-center gap-1 cursor-pointer" title="Display dauerhaft anlassen (Screen Always-On & Timeout-Tipp)">
+        <span>☀️</span> <span class="hidden sm:inline">Screen On</span>
       </button>
     </div>
 
