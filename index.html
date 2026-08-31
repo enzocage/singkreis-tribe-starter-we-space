@@ -378,52 +378,64 @@
   </div>
 
   <!-- ==================== SCREEN TIMEOUT / DISPLAY WAKE-LOCK TIP MODAL ==================== -->
-  <div id="screenTimeoutTipModal" class="fixed inset-0 z-[160] bg-stone-950/90 backdrop-blur-md hidden flex items-center justify-center p-4 select-none" onclick="closeScreenTimeoutTipModal()">
-    <div class="relative max-w-md w-full bg-stone-900 border-2 border-amber-500/80 rounded-2xl shadow-2xl p-5 text-stone-100 animate-scale-up" onclick="event.stopPropagation()">
-      <div class="flex items-center gap-3 mb-3 border-b border-stone-800 pb-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 font-bold flex items-center justify-center text-xl shadow">
-          💡
-        </div>
-        <div>
-          <h3 class="text-base font-black text-white leading-tight">Display dunkelt ab beim Singen?</h3>
-          <p class="text-[11px] text-amber-400 font-semibold">Tipp für ungestörtes Musizieren</p>
-        </div>
-      </div>
-
-      <p class="text-xs text-stone-300 leading-relaxed mb-3">
-        Damit dein Display beim Singkreis nicht automatisch ausgeht, kannst du den Bildschirm-Timeout in deinen Handy-Einstellungen anpassen:
-      </p>
-
-      <div class="space-y-2.5 mb-4 text-xs">
-        <!-- iOS -->
-        <div class="bg-stone-950/80 border border-stone-800 rounded-xl p-3">
-          <div class="flex items-center gap-1.5 font-bold text-stone-200 mb-1">
-            <span>🍎</span> <span>iPhone / iPad:</span>
+  <div id="screenTimeoutTipModal" class="fixed inset-0 z-[160] bg-stone-950/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto select-none" onclick="closeScreenTimeoutTipModal()">
+    <div class="relative max-w-xl w-full bg-stone-900 border-2 border-amber-500/80 rounded-2xl shadow-2xl p-4 sm:p-5 text-stone-100 animate-scale-up max-h-[94vh] flex flex-col overflow-hidden my-auto" onclick="event.stopPropagation()">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between gap-3 mb-2.5 border-b border-stone-800 pb-2.5 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 font-bold flex items-center justify-center text-lg shadow shrink-0">
+            💡
           </div>
-          <p class="text-stone-400 text-[11px] leading-snug">
-            <span class="text-amber-300 font-mono font-semibold">Einstellungen</span> ➔ <span class="text-amber-300 font-mono font-semibold">Anzeige & Helligkeit</span> ➔ <span class="text-amber-300 font-mono font-semibold">Automatische Sperre</span> ➔ auf <strong class="text-white">„Nie“</strong> setzen.
-          </p>
-        </div>
-
-        <!-- Android -->
-        <div class="bg-stone-950/80 border border-stone-800 rounded-xl p-3">
-          <div class="flex items-center gap-1.5 font-bold text-stone-200 mb-1">
-            <span>🤖</span> <span>Android:</span>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white leading-tight">Display dauerhaft anlassen</h3>
+            <p class="text-[10px] sm:text-[11px] text-amber-400 font-semibold">Tipp für ungestörtes Musizieren & Singen</p>
           </div>
-          <p class="text-stone-400 text-[11px] leading-snug">
-            <span class="text-amber-300 font-mono font-semibold">Einstellungen</span> ➔ <span class="text-amber-300 font-mono font-semibold">Display</span> ➔ <span class="text-amber-300 font-mono font-semibold">Bildschirm-Timeout</span> ➔ auf <strong class="text-white">10–30 Min.</strong> oder <strong class="text-white">„Aufmerksamkeitserkennung“</strong> setzen.
-          </p>
+        </div>
+        <button type="button" onclick="closeScreenTimeoutTipModal()" class="w-7 h-7 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white font-bold flex items-center justify-center transition text-xs shrink-0 cursor-pointer">✕</button>
+      </div>
+
+      <!-- Scrollbarer Inhalt für Querformat / kleine Bildschirme -->
+      <div class="overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
+        <p class="text-xs text-stone-300 leading-relaxed">
+          Damit dein Bildschirm beim Singkreis nicht automatisch ausgeht, kannst du den Timeout in deinen Handy-Einstellungen anpassen:
+        </p>
+
+        <!-- 2 Spalten im Querformat/Desktop, 1 Spalte im Hochformat -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <!-- iOS -->
+          <div class="bg-stone-950/80 border border-stone-800 rounded-xl p-2.5 flex flex-col justify-between">
+            <div class="flex items-center gap-1.5 font-bold text-stone-200 mb-1">
+              <span>🍎</span> <span>iPhone / iPad:</span>
+            </div>
+            <p class="text-stone-400 text-[11px] leading-snug">
+              <span class="text-amber-300 font-mono font-semibold">Einstellungen</span> ➔ <span class="text-amber-300 font-mono font-semibold">Anzeige & Helligkeit</span> ➔ <span class="text-amber-300 font-mono font-semibold">Automatische Sperre</span> ➔ auf <strong class="text-white">„Nie“</strong> setzen.
+            </p>
+          </div>
+
+          <!-- Android -->
+          <div class="bg-stone-950/80 border border-stone-800 rounded-xl p-2.5 flex flex-col justify-between">
+            <div class="flex items-center gap-1.5 font-bold text-stone-200 mb-1">
+              <span>🤖</span> <span>Android:</span>
+            </div>
+            <p class="text-stone-400 text-[11px] leading-snug">
+              <span class="text-amber-300 font-mono font-semibold">Einstellungen</span> ➔ <span class="text-amber-300 font-mono font-semibold">Display</span> ➔ <span class="text-amber-300 font-mono font-semibold">Bildschirm-Timeout</span> ➔ auf <strong class="text-white">10–30 Min.</strong> oder <strong class="text-white">„Aufmerksamkeitserkennung“</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-2 bg-amber-950/40 border border-amber-500/30 rounded-xl text-[11px] text-amber-200/90 flex items-center gap-2">
+          <span class="text-sm shrink-0">⚡</span>
+          <p class="leading-snug">Die App hält dein Display zusätzlich per Web-WakeLock aktiv, sofern der Browser dies unterstützt.</p>
         </div>
       </div>
 
-      <div class="p-2.5 bg-amber-950/40 border border-amber-500/30 rounded-xl text-[11px] text-amber-200/90 mb-4 flex items-center gap-2">
-        <span class="text-base">⚡</span>
-        <p>Die App hält dein Display per Web-WakeLock bereits zusätzlich aktiv, sofern dein Browser dies erlaubt.</p>
+      <!-- Footer Button -->
+      <div class="pt-2.5 mt-1 border-t border-stone-800 shrink-0">
+        <button type="button" onclick="closeScreenTimeoutTipModal()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black rounded-xl text-xs shadow-lg transition active:scale-95 cursor-pointer">
+          ✅ Alles klar, verstanden
+        </button>
       </div>
-
-      <button type="button" onclick="closeScreenTimeoutTipModal()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black rounded-xl text-xs shadow-lg transition active:scale-95 cursor-pointer">
-        ✅ Alles klar, verstanden
-      </button>
     </div>
   </div>
 
