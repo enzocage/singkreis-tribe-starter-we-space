@@ -2488,17 +2488,48 @@
     }
 
     // ==================== SONG HINZUFÜGEN & GEMINI AI LOGIK ====================
+    let ENV_GEMINI_KEY = "";
     let researchedSuggestions = [];
 
-    function openAddSongModal(presetTitle = "", presetArtist = "") {
+    async function getActiveGeminiKey() {
+      // 1. Aus .env injiziert oder geladen
+      if (typeof ENV_GEMINI_KEY === "string" && ENV_GEMINI_KEY.trim()) {
+        return ENV_GEMINI_KEY.trim();
+      }
+      // 2. Versuch, .env dynamisch abzurufen (z.B. bei lokalem Webserver)
+      try {
+        const res = await fetch('.env');
+        if (res.ok) {
+          const text = await res.text();
+          const match = text.match(/^GEMINI_API_KEY\s*=\s*(.+)$/m);
+          if (match && match[1].trim()) {
+            const key = match[1].trim();
+            ENV_GEMINI_KEY = key;
+            localStorage.setItem("singkreis_gemini_key", key);
+            return key;
+          }
+        }
+      } catch (e) {}
+      // 3. Fallback auf Eingabefeld oder localStorage
+      const inputKey = document.getElementById("geminiApiKey")?.value?.trim();
+      if (inputKey) {
+        localStorage.setItem("singkreis_gemini_key", inputKey);
+        return inputKey;
+      }
+      return localStorage.getItem("singkreis_gemini_key") || "";
+    }
+
+    async function openAddSongModal(presetTitle = "", presetArtist = "") {
       const modal = document.getElementById("addSongModal");
       if (!modal) return;
       document.getElementById("newSongTitle").value = presetTitle;
       document.getElementById("newSongArtist").value = presetArtist;
       
-      const savedKey = localStorage.getItem("singkreis_gemini_key") || "";
+      const activeKey = await getActiveGeminiKey();
       const keyInput = document.getElementById("geminiApiKey");
-      if (keyInput && savedKey) keyInput.value = savedKey;
+      if (keyInput && activeKey) {
+        keyInput.value = activeKey;
+      }
 
       const statusBox = document.getElementById("aiStatusBox");
       if (statusBox) statusBox.classList.add("hidden");
@@ -2526,17 +2557,17 @@
       if (event) event.preventDefault();
       const title = document.getElementById("newSongTitle").value.trim();
       const artist = document.getElementById("newSongArtist").value.trim();
-      const apiKey = document.getElementById("geminiApiKey").value.trim();
+      const apiKeyInput = document.getElementById("geminiApiKey").value.trim();
 
       if (!title && !artist) {
         alert("Bitte gib mindestens einen Songtitel oder einen Interpreten ein.");
         return;
       }
 
-      if (apiKey) {
-        localStorage.setItem("singkreis_gemini_key", apiKey);
+      if (apiKeyInput) {
+        localStorage.setItem("singkreis_gemini_key", apiKeyInput);
       }
-      const savedKey = apiKey || localStorage.getItem("singkreis_gemini_key") || "";
+      const savedKey = await getActiveGeminiKey();
 
       const statusBox = document.getElementById("aiStatusBox");
       const searchBtn = document.getElementById("search10Btn");
@@ -2547,8 +2578,8 @@
       if (!savedKey) {
         statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-amber-950/80 border-amber-500 text-amber-200 block";
         statusBox.innerHTML = `
-          <p class="font-bold text-white mb-1">🔑 Bitte gib deinen kostenlosen Gemini API Key ein</p>
-          <p class="text-[11px] mb-2 text-stone-300">Für die automatische Webrecherche wird ein kostenloser Google AI Studio Key benötigt.</p>
+          <p class="font-bold text-white mb-1">🔑 Bitte gib deinen Gemini API Key in .env oder hier ein</p>
+          <p class="text-[11px] mb-2 text-stone-300">Entweder in der Datei <code>.env</code> (<code>GEMINI_API_KEY=...</code>) eintragen oder direkt hier im Feld eingeben.</p>
           <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black rounded-lg text-xs transition">
             Gratis Key in 10 Sekunden erstellen ↗
           </a>
@@ -2660,7 +2691,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
       if (checkedBoxes.length === 0) return;
 
       const selectedSongs = checkedBoxes.map(cb => researchedSuggestions[parseInt(cb.getAttribute("data-idx"))]);
-      const savedKey = localStorage.getItem("singkreis_gemini_key") || "";
+      const savedKey = await getActiveGeminiKey();
       if (!savedKey) return;
 
       const statusBox = document.getElementById("aiStatusBox");
