@@ -451,11 +451,14 @@
 
     <div class="flex items-center justify-between mb-3 px-1 text-xs font-semibold text-stone-400">
       <div><span id="songsCount" class="text-amber-400 font-bold">0</span> Songs im Repertoire</div>
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-1.5">
         <span>Sortierung:</span>
-        <select id="sortSelect" onchange="renderSongList()" class="bg-stone-800 text-white rounded px-1.5 py-0.5 text-xs border border-stone-700 focus:outline-none focus:border-amber-500">
+        <select id="sortSelect" onchange="renderSongList()" class="bg-stone-800 text-white rounded-lg px-2 py-1 text-xs border border-stone-700 focus:outline-none focus:border-amber-500 font-medium">
           <option value="title">Titel (A-Z)</option>
           <option value="artist">Interpret</option>
+          <option value="year_desc">Erscheinungsjahr (Neueste zuerst)</option>
+          <option value="year_asc">Erscheinungsjahr (Älteste zuerst)</option>
+          <option value="community">👥 Community Songs</option>
           <option value="tempo">Tempo (BPM)</option>
         </select>
       </div>
@@ -2255,6 +2258,14 @@
 
       filtered.sort((a, b) => {
         if (sortVal === "artist") return a.artist.localeCompare(b.artist);
+        if (sortVal === "year_desc") return (b.year || 0) - (a.year || 0);
+        if (sortVal === "year_asc") return (a.year || 9999) - (b.year || 9999);
+        if (sortVal === "community") {
+          const commA = a.isCommunity ? 1 : 0;
+          const commB = b.isCommunity ? 1 : 0;
+          if (commA !== commB) return commB - commA;
+          return a.title.localeCompare(b.title);
+        }
         if (sortVal === "tempo") return a.tempo - b.tempo;
         return a.title.localeCompare(b.title);
       });
@@ -2268,6 +2279,12 @@
       }
 
       noResults.classList.add("hidden");
+
+      if (sortVal === "community") {
+        // Bei Community-Sortierung: Alle Lieder direkt in sortierter Reihenfolge (Community oben)
+        grid.innerHTML = filtered.map(song => renderSongCardHtml(song, song.isCommunity)).join("");
+        return;
+      }
 
       const curatedSongs = filtered.filter(s => !s.isCommunity);
       const communitySongs = filtered.filter(s => s.isCommunity);
