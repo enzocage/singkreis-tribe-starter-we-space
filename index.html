@@ -2912,9 +2912,20 @@
 
     function changeFontSize(delta) {
       // Minimum um 100% nach unten (von 16px auf 10px) und Maximum um 100% nach oben (von 38px auf 76px) erweitert
+      const oldSize = baseFontSize;
       baseFontSize = Math.max(10, Math.min(76, baseFontSize + delta));
       renderSongLyrics();
       showFontSizeIndicator();
+
+      // Scroll-Tempo im Tempo-Widget automatisch anpassen (proportional zur Schriftgröße):
+      const scale = baseFontSize / oldSize;
+      autoScrollSpeed = Math.max(0.2, Math.min(10.0, +(autoScrollSpeed * scale).toFixed(1)));
+
+      const widgetValue = document.getElementById("scrollSpeedWidgetValue");
+      if (widgetValue) widgetValue.textContent = `${autoScrollSpeed.toFixed(1)}x`;
+
+      const btnText = document.getElementById("autoScrollBtnText");
+      if (btnText && isAutoScrolling) btnText.textContent = `Scroll (${autoScrollSpeed.toFixed(1)}x)`;
     }
 
     let fontSizeIndicatorTimer = null;
@@ -2948,6 +2959,7 @@
     // ==================== PINCH-TO-ZOOM GESTEN (2-FINGER ZOOM) ====================
     let initialPinchDistance = null;
     let initialPinchFontSize = null;
+    let initialPinchAutoScrollSpeed = null;
 
     function initPinchToZoomListeners() {
       const scrollArea = document.getElementById("modalScrollArea");
@@ -2960,6 +2972,7 @@
           const dy = e.touches[0].clientY - e.touches[1].clientY;
           initialPinchDistance = Math.hypot(dx, dy);
           initialPinchFontSize = baseFontSize;
+          initialPinchAutoScrollSpeed = autoScrollSpeed;
         }
       }, { passive: true });
 
@@ -2977,6 +2990,20 @@
             const lyricsBody = document.getElementById("modalLyricsBody");
             if (lyricsBody) lyricsBody.style.fontSize = `${baseFontSize}px`;
             showFontSizeIndicator();
+
+            // Automatische Anpassung des Scroll-Tempos im Tempo-Widget bei Pinch-to-Zoom:
+            const scale = baseFontSize / initialPinchFontSize;
+            autoScrollSpeed = Math.max(0.2, Math.min(10.0, +( (initialPinchAutoScrollSpeed || 1.0) * scale ).toFixed(1)));
+
+            const widgetValue = document.getElementById("scrollSpeedWidgetValue");
+            if (widgetValue) widgetValue.textContent = `${autoScrollSpeed.toFixed(1)}x`;
+
+            const btnText = document.getElementById("autoScrollBtnText");
+            if (btnText && isAutoScrolling) btnText.textContent = `Scroll (${autoScrollSpeed.toFixed(1)}x)`;
+
+            if (isAutoScrolling) {
+              showScrollSpeedWidget(true);
+            }
           }
         }
       }, { passive: false });
@@ -2988,6 +3015,7 @@
           }
           initialPinchDistance = null;
           initialPinchFontSize = null;
+          initialPinchAutoScrollSpeed = null;
         }
       }, { passive: true });
 
@@ -3043,16 +3071,10 @@
         const dt = Math.min(0.1, (now - lastScrollTime) / 1000);
         lastScrollTime = now;
 
-        // Exakte Scrollgeschwindigkeit proportional zur aktuellen Schriftgröße und zum Song-Tempo (BPM):
-        // 1. Song-Tempo: Standard 85 BPM als Basis-Referenz
+        // Exakte Scrollgeschwindigkeit proportional zum angezeigten autoScrollSpeed und zum Song-Tempo (BPM):
         const bpm = (activeSong && activeSong.tempo) ? activeSong.tempo : 85;
         const bpmFactor = bpm / 85;
-        
-        // 2. Schriftgrößen-Faktor: Referenz-Schriftgröße 23px
-        // Bei größerer oder kleinerer Schrift (via A+/A- oder Pinch-to-Zoom)
-        // laufen die Textzeilen immer im exakt gleichen Lied- und Singtempo durch!
-        const fontRatio = (baseFontSize || 23) / 23;
-        const pxPerSecond = 24 * fontRatio * bpmFactor * autoScrollSpeed;
+        const pxPerSecond = 24 * bpmFactor * autoScrollSpeed;
         scrollSubPixelAcc += pxPerSecond * dt;
 
         if (scrollSubPixelAcc >= 1) {
