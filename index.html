@@ -477,20 +477,23 @@
         <!-- Dynamisch gerendert -->
       </div>
 
-      <!-- Disclaimer zu Mantren & Trance/Suggestion -->
-      <div class="px-4 py-3 bg-stone-950/90 border-t border-violet-900/40 text-[11px] text-stone-400 flex items-start gap-2.5 shrink-0">
-        <span class="text-violet-400 text-sm shrink-0">🕉️</span>
-        <p class="leading-relaxed text-stone-300 text-left">
-          <strong class="text-violet-300">Hinweis:</strong> Das rhythmische Wiederholen von Mantren und Texten wirkt über kognitive und suggestive Mechanismen direkt auf das Unterbewusstsein. Bei regelmäßiger und intensiver Anwendung können sich sprachliche Muster, Glaubenssätze und emotionale Zustände tief im Denken verankern. Achte daher auf einen eigenverantwortlichen und reflektierten Umgang.
-        </p>
+      <!-- Disclaimer zu Mantren & Trance/Suggestion (Schließen-Button schließt nur diesen Hinweis) -->
+      <div id="mantraDisclaimerBanner" class="px-4 py-3 bg-stone-950/95 border-t border-violet-900/40 text-[11px] text-stone-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shrink-0">
+        <div class="flex items-start gap-2.5 flex-1">
+          <span class="text-violet-400 text-sm shrink-0 mt-0.5">🕉️</span>
+          <p class="leading-relaxed text-stone-300 text-left">
+            <strong class="text-violet-300">Hinweis:</strong> Das rhythmische Wiederholen von Mantren und Texten wirkt über kognitive und suggestive Mechanismen direkt auf das Unterbewusstsein. Bei regelmäßiger und intensiver Anwendung können sich sprachliche Muster, Glaubenssätze und emotionale Zustände tief im Denken verankern. Achte daher auf einen eigenverantwortlichen und reflektierten Umgang.
+          </p>
+        </div>
+        <button type="button" onclick="closeMantraDisclaimer()" class="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 active:bg-violet-900 text-stone-200 hover:text-white font-bold rounded-xl text-xs transition shrink-0 cursor-pointer self-end sm:self-center border border-stone-700" title="Diesen Hinweis schließen">
+          ✕ Hinweis schließen
+        </button>
       </div>
 
       <!-- Modal Footer -->
-      <div class="p-3 sm:px-5 sm:py-2.5 border-t border-stone-800 bg-stone-950 flex items-center justify-between text-xs text-stone-400 shrink-0">
+      <div class="p-3 sm:px-5 sm:py-2 border-t border-stone-800 bg-stone-950 flex items-center justify-between text-xs text-stone-400 shrink-0">
         <span id="mantraCountDisplay" class="font-bold text-stone-400">Zeige 673 Mantren</span>
-        <button onclick="closeMantrasModal()" class="px-4 py-1.5 bg-stone-800 hover:bg-stone-700 text-white font-bold rounded-xl text-xs transition">
-          Schließen
-        </button>
+        <span class="text-[11px] text-stone-500">Klick auf Lied startet Songsuche</span>
       </div>
 
     </div>
@@ -3478,6 +3481,14 @@
     function closeMantrasModal() {
       const modal = document.getElementById("mantrasModal");
       if (modal) modal.classList.add("hidden");
+    }
+
+    function closeMantraDisclaimer() {
+      const banner = document.getElementById("mantraDisclaimerBanner");
+      if (banner) {
+        banner.style.display = "none";
+        showToast("Hinweis ausgeblendet ✓");
+      }
     }
 
     function handleMantraSearch(val) {
