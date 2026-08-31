@@ -2887,8 +2887,11 @@
         const dt = Math.min(0.1, (now - lastScrollTime) / 1000);
         lastScrollTime = now;
 
-        // Basisgeschwindigkeit: 24 Pixel pro Sekunde bei 1.0x
-        const pxPerSecond = 24 * autoScrollSpeed;
+        // Basisgeschwindigkeit proportional zur aktuellen Schriftgröße (baseFontSize / 23):
+        // Bei größerer/kleinerer Schrift (via A+/A- oder Pinch-to-Zoom)
+        // scrollen die Zeilen immer exakt im gleichen Sing-Tempo durch!
+        const fontRatio = (baseFontSize || 23) / 23;
+        const pxPerSecond = 24 * fontRatio * autoScrollSpeed;
         scrollSubPixelAcc += pxPerSecond * dt;
 
         if (scrollSubPixelAcc >= 1) {
