@@ -45,6 +45,7 @@
     .chord-line {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-weight: 800;
+      font-size: 0.92em;
       color: #b45309;
       line-height: 1.25;
       letter-spacing: 0.03em;
@@ -2713,7 +2714,7 @@
         if (isChordLine(line)) {
           if (!showChords) return;
           const transposed = transposeLine(line, currentTransposition, detectedChords);
-          renderedHtml += `<div class="chord-line" style="font-size: ${Math.round(baseFontSize * 0.95)}px;">${escapeHtml(transposed)}</div>`;
+          renderedHtml += `<div class="chord-line">${escapeHtml(transposed)}</div>`;
         } else {
           renderedHtml += `<div class="lyrics-line">${escapeHtml(line)}</div>`;
         }
@@ -2847,6 +2848,9 @@
 
       scrollArea.addEventListener("touchend", (e) => {
         if (e.touches.length < 2) {
+          if (initialPinchDistance) {
+            renderSongLyrics();
+          }
           initialPinchDistance = null;
           initialPinchFontSize = null;
         }
@@ -2904,11 +2908,16 @@
         const dt = Math.min(0.1, (now - lastScrollTime) / 1000);
         lastScrollTime = now;
 
-        // Basisgeschwindigkeit proportional zur aktuellen Schriftgröße (baseFontSize / 23):
-        // Bei größerer/kleinerer Schrift (via A+/A- oder Pinch-to-Zoom)
-        // scrollen die Zeilen immer exakt im gleichen Sing-Tempo durch!
+        // Exakte Scrollgeschwindigkeit proportional zur aktuellen Schriftgröße und zum Song-Tempo (BPM):
+        // 1. Song-Tempo: Standard 85 BPM als Basis-Referenz
+        const bpm = (activeSong && activeSong.tempo) ? activeSong.tempo : 85;
+        const bpmFactor = bpm / 85;
+        
+        // 2. Schriftgrößen-Faktor: Referenz-Schriftgröße 23px
+        // Bei größerer oder kleinerer Schrift (via A+/A- oder Pinch-to-Zoom)
+        // laufen die Textzeilen immer im exakt gleichen Lied- und Singtempo durch!
         const fontRatio = (baseFontSize || 23) / 23;
-        const pxPerSecond = 24 * fontRatio * autoScrollSpeed;
+        const pxPerSecond = 24 * fontRatio * bpmFactor * autoScrollSpeed;
         scrollSubPixelAcc += pxPerSecond * dt;
 
         if (scrollSubPixelAcc >= 1) {
