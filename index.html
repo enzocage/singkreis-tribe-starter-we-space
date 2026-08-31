@@ -195,19 +195,39 @@
           </div>
         </div>
 
-        <!-- Optionaler Gemini API-Key -->
-        <div class="pt-0.5">
+        <!-- Gemini API-Key (Sicher & ohne Passwort-Manager Störung) -->
+        <div class="pt-0.5" id="apiKeySection">
           <div class="flex items-center justify-between mb-1">
-            <label class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Gemini API Key (Gratis)</label>
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-[10px] text-amber-400 hover:underline">Gratis Key erstellen ↗</a>
+            <label class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Gemini API Key</label>
+            <button type="button" onclick="toggleEditApiKey()" id="editApiKeyBtn" class="hidden text-[10px] text-amber-400 hover:underline">Key ändern ✎</button>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" id="createApiKeyLink" class="text-[10px] text-amber-400 hover:underline">Gratis Key erstellen ↗</a>
           </div>
-          <input 
-            type="password" 
-            id="geminiApiKey" 
-            placeholder="AIzaSy... (Wird dauerhaft im Browser gespeichert)" 
-            class="w-full px-3 py-2 bg-stone-950 border border-stone-800 focus:border-amber-500 rounded-lg text-xs text-stone-200 placeholder-stone-600 focus:outline-none"
-          >
-          <p class="text-[10px] text-stone-500 mt-1">Ermöglicht Live-Recherche & Songerstellung über Google Gemini 2.5 Flash.</p>
+
+          <!-- Aktiver Key Badge (Maskiert) -->
+          <div id="activeKeyBadge" class="hidden p-2.5 bg-stone-950 border border-emerald-500/40 rounded-xl flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span class="text-xs font-mono text-emerald-300 font-bold" id="maskedKeyText">••••••••••••••••</span>
+            </div>
+            <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-500/50 px-1.5 py-0.5 rounded font-semibold">Aktiv</span>
+          </div>
+
+          <!-- Key Eingabefeld (wird nur angezeigt, wenn kein Key da ist oder auf 'Ändern' geklickt wird) -->
+          <div id="keyInputContainer">
+            <input 
+              type="text" 
+              id="geminiApiKey" 
+              placeholder="AIzaSy... (Wird sicher im Browser gespeichert)" 
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              data-1p-ignore="true"
+              data-lpignore="true"
+              class="w-full px-3 py-2 bg-stone-950 border border-stone-800 focus:border-amber-500 rounded-lg text-xs text-stone-200 placeholder-stone-600 font-mono focus:outline-none"
+            >
+            <p class="text-[10px] text-stone-500 mt-1">Ermöglicht Live-Recherche & Songerstellung über Google Gemini 3.6 Flash.</p>
+          </div>
         </div>
 
         <!-- Recherche-Button -->
@@ -2735,6 +2755,23 @@
       return localStorage.getItem("singkreis_gemini_key") || "";
     }
 
+    function toggleEditApiKey() {
+      const badge = document.getElementById("activeKeyBadge");
+      const inputContainer = document.getElementById("keyInputContainer");
+      const editBtn = document.getElementById("editApiKeyBtn");
+      const link = document.getElementById("createApiKeyLink");
+      
+      if (badge) badge.classList.add("hidden");
+      if (inputContainer) inputContainer.classList.remove("hidden");
+      if (editBtn) editBtn.classList.add("hidden");
+      if (link) link.classList.remove("hidden");
+      const input = document.getElementById("geminiApiKey");
+      if (input) {
+        input.value = "";
+        input.focus();
+      }
+    }
+
     async function openAddSongModal(presetTitle = "", presetArtist = "") {
       const modal = document.getElementById("addSongModal");
       if (!modal) return;
@@ -2743,8 +2780,25 @@
       
       const activeKey = await getActiveGeminiKey();
       const keyInput = document.getElementById("geminiApiKey");
-      if (keyInput && activeKey) {
-        keyInput.value = activeKey;
+      const badge = document.getElementById("activeKeyBadge");
+      const inputContainer = document.getElementById("keyInputContainer");
+      const editBtn = document.getElementById("editApiKeyBtn");
+      const link = document.getElementById("createApiKeyLink");
+      const maskedText = document.getElementById("maskedKeyText");
+
+      if (activeKey && activeKey.length > 8) {
+        if (keyInput) keyInput.value = activeKey;
+        const masked = activeKey.substring(0, 4) + "••••••••" + activeKey.substring(activeKey.length - 4);
+        if (maskedText) maskedText.textContent = masked;
+        if (badge) badge.classList.remove("hidden");
+        if (inputContainer) inputContainer.classList.add("hidden");
+        if (editBtn) editBtn.classList.remove("hidden");
+        if (link) link.classList.add("hidden");
+      } else {
+        if (badge) badge.classList.add("hidden");
+        if (inputContainer) inputContainer.classList.remove("hidden");
+        if (editBtn) editBtn.classList.add("hidden");
+        if (link) link.classList.remove("hidden");
       }
 
       const statusBox = document.getElementById("aiStatusBox");
