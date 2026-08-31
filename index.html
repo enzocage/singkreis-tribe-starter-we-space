@@ -2672,7 +2672,17 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
 
       } catch (err) {
         statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-rose-950/70 border-rose-500 text-rose-200 block";
-        statusBox.innerHTML = `<span>❌ Fehler bei der Webrecherche: ${escapeHtml(err.message)}</span>`;
+        if (err.message && (err.message.includes("prepayment") || err.message.includes("credits") || err.message.includes("billing"))) {
+          statusBox.innerHTML = `
+            <p class="font-bold text-white mb-1">⚠️ Projekt-Guthaben aufgebraucht</p>
+            <p class="text-[11px] mb-2 text-rose-200">Der aktuelle API-Key gehört zu einem Google-Cloud-Konto mit aufgebrauchtem Prepayment-Guthaben. Du kannst in 10 Sekunden einen <strong>kostenlosen Free-Tier API-Key</strong> erstellen:</p>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black rounded-lg text-xs transition">
+              Neuen Gratis Key erstellen ↗
+            </a>
+          `;
+        } else {
+          statusBox.innerHTML = `<span>❌ Fehler bei der Webrecherche: ${escapeHtml(err.message)}</span>`;
+        }
       } finally {
         searchBtn.disabled = false;
         spinner.classList.add("hidden");
