@@ -94,6 +94,20 @@
       #songModal { position: static !important; background: white !important; }
       .chord-line { color: #000 !important; }
     }
+    @keyframes shimmer-move {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(250%); }
+    }
+    .animate-shimmer {
+      animation: shimmer-move 1.6s infinite linear;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.25), inset 0 0 10px rgba(245, 158, 11, 0.1); }
+      50% { box-shadow: 0 0 28px rgba(245, 158, 11, 0.5), inset 0 0 18px rgba(245, 158, 11, 0.25); }
+    }
+    .ai-progress-glow {
+      animation: pulse-glow 2s infinite ease-in-out;
+    }
   </style>
 </head>
 <body class="bg-stone-900 text-stone-100 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
@@ -3162,6 +3176,85 @@
       throw lastError || new Error("Kein kompatibles Gemini-Modell gefunden.");
     }
 
+    // ==================== AUFFÄLLIGER FORTSCHRITTSBALKEN & AI ANIMATION ====================
+    let activeAiProgressTimer = null;
+
+    function showAiProgressBar(title, initialSubtext = "Starte AI-Generierung...") {
+      const statusBox = document.getElementById("aiStatusBox");
+      if (!statusBox) return null;
+
+      if (activeAiProgressTimer) {
+        clearInterval(activeAiProgressTimer);
+        activeAiProgressTimer = null;
+      }
+
+      statusBox.className = "p-4 sm:p-5 rounded-2xl border-2 border-amber-500/70 bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950 shadow-2xl ai-progress-glow space-y-3 block my-3 animate-scale-up";
+      statusBox.innerHTML = `
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/30 to-amber-600/20 border border-amber-500/60 text-amber-300 font-black flex items-center justify-center text-lg shadow-md shrink-0 animate-pulse">
+              ✨
+            </div>
+            <div class="truncate">
+              <p class="text-sm font-black text-white truncate leading-tight">${escapeHtml(title)}</p>
+              <p id="aiProgressSubtext" class="text-xs text-amber-300 font-semibold truncate mt-0.5">${escapeHtml(initialSubtext)}</p>
+            </div>
+          </div>
+          <span id="aiProgressPercent" class="text-sm font-black text-amber-400 font-mono shrink-0 bg-stone-950 px-2 py-0.5 rounded-lg border border-amber-500/30">5%</span>
+        </div>
+
+        <!-- Großer leuchtender Fortschrittsbalken mit Shimmer-Glanz -->
+        <div class="relative w-full h-4 bg-stone-950 border border-stone-700/80 rounded-full overflow-hidden p-0.5 shadow-inner">
+          <div id="aiProgressBarFill" class="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-emerald-400 rounded-full transition-all duration-300 relative overflow-hidden shadow-lg shadow-amber-500/30" style="width: 5%;">
+            <div class="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 animate-shimmer"></div>
+          </div>
+        </div>
+      `;
+
+      let currentPercent = 5;
+      activeAiProgressTimer = setInterval(() => {
+        if (currentPercent < 88) {
+          currentPercent += Math.floor(Math.random() * 6) + 2;
+          if (currentPercent > 88) currentPercent = 88;
+          updateAiProgressBarUi(currentPercent);
+          
+          const sub = document.getElementById("aiProgressSubtext");
+          if (sub) {
+            if (currentPercent > 15 && currentPercent <= 40) sub.textContent = "Analysiere Tonart, Taktmaß & Original-Künstler...";
+            else if (currentPercent > 40 && currentPercent <= 68) sub.textContent = "Schreibe vollständige Strophen, Refrain & Struktur...";
+            else if (currentPercent > 68) sub.textContent = "Setze präzise Gitarren-Akkorde über den Text...";
+          }
+        }
+      }, 280);
+
+      return {
+        update: (percent, subtext) => {
+          updateAiProgressBarUi(percent);
+          if (subtext) {
+            const sub = document.getElementById("aiProgressSubtext");
+            if (sub) sub.textContent = subtext;
+          }
+        },
+        complete: (subtext) => {
+          if (activeAiProgressTimer) clearInterval(activeAiProgressTimer);
+          updateAiProgressBarUi(100);
+          const sub = document.getElementById("aiProgressSubtext");
+          if (sub) sub.textContent = subtext || "🎉 Fertiggestellt!";
+        },
+        stop: () => {
+          if (activeAiProgressTimer) clearInterval(activeAiProgressTimer);
+        }
+      };
+    }
+
+    function updateAiProgressBarUi(percent) {
+      const fill = document.getElementById("aiProgressBarFill");
+      const pctText = document.getElementById("aiProgressPercent");
+      const p = Math.min(100, Math.max(0, percent));
+      if (fill) fill.style.width = `${p}%`;
+      if (pctText) pctText.textContent = `${p}%`;
+    }
+
     // Direkt einen einzelnen Song mit AI generieren und öffnen
     async function handleFindSingleSong() {
       const query = (document.getElementById("newSongSearchQuery")?.value || "").trim();
@@ -3203,15 +3296,14 @@
       btnText.textContent = "Generiere Song...";
       if (suggestionsWrapper) suggestionsWrapper.classList.add("hidden");
 
-      statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-amber-950/40 border-amber-600/60 text-amber-200 block";
-      statusBox.innerHTML = `<span>⏳ Gemini AI erstellt vollständigen Text & Akkorde für <strong>"${escapeHtml(query)}"</strong>...</span>`;
+      // Auffälligen Fortschrittsbalken starten
+      const progress = showAiProgressBar("✨ Generiere Song & Gitarrenakkorde...", `Erstelle "${query}" mit Gemini AI...`);
 
       try {
         const createdSong = await generateSingleSongByAI(query, "", new Date().getFullYear(), savedKey);
         await saveCommunitySong(createdSong);
 
-        statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-emerald-950/60 border-emerald-500 text-emerald-200 block";
-        statusBox.innerHTML = `<span>✅ Song <strong>"${escapeHtml(createdSong.title)}"</strong> (${escapeHtml(createdSong.artist)}) erfolgreich erstellt!</span>`;
+        if (progress) progress.complete(`✅ "${createdSong.title}" (${createdSong.artist}) erfolgreich erstellt!`);
 
         renderSongList();
         showToast(`"${createdSong.title}" hinzugefügt! 🎶`);
@@ -3219,9 +3311,10 @@
         setTimeout(() => {
           closeAddSongModal();
           openSongModal(createdSong.id);
-        }, 600);
+        }, 700);
 
       } catch (err) {
+        if (progress) progress.stop();
         statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-rose-950/70 border-rose-500 text-rose-200 block";
         statusBox.innerHTML = `<span>❌ Fehler bei der Song-Erstellung: ${escapeHtml(err.message)}</span>`;
       } finally {
@@ -3312,8 +3405,7 @@ WICHTIG für "content":
       btnText.textContent = "Recherchiere 10 Songs...";
       suggestionsWrapper.classList.add("hidden");
 
-      statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-amber-950/40 border-amber-600/60 text-amber-200 block";
-      statusBox.innerHTML = `<span>⏳ Gemini AI recherchiert 10 passende Songs für <strong>"${escapeHtml(query)}"</strong>...</span>`;
+      const progress = showAiProgressBar("🔍 Recherche nach 10 passenden Songs...", `Suche Vorschläge für "${query}"...`);
 
       try {
         const promptText = `Du bist ein professioneller Musikexperte für Akustikgitarre, Lagerfeuer und Singkreis-Repertoire.
@@ -3330,13 +3422,13 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
           throw new Error("Ungültiges Listenformat von Gemini erhalten.");
         }
 
-        statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-emerald-950/60 border-emerald-500 text-emerald-200 block";
-        statusBox.innerHTML = `<span>✅ 10 passende Songs gefunden! Wähle unten deine gewünschten Songs aus:</span>`;
+        if (progress) progress.complete("✅ 10 passende Songs gefunden! Wähle unten deine gewünschten Songs aus:");
 
         renderSuggestionsList();
         suggestionsWrapper.classList.remove("hidden");
 
       } catch (err) {
+        if (progress) progress.stop();
         statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-rose-950/70 border-rose-500 text-rose-200 block";
         if (err.message && (err.message.includes("prepayment") || err.message.includes("credits") || err.message.includes("billing"))) {
           statusBox.innerHTML = `
@@ -3411,11 +3503,13 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
       let successCount = 0;
       let lastGeneratedId = null;
 
+      const progress = showAiProgressBar("✨ Generiere ausgewählte Songs...", `Song 1 von ${selectedSongs.length}: "${selectedSongs[0].title}"`);
+
       for (let i = 0; i < selectedSongs.length; i++) {
         const item = selectedSongs[i];
         btnText.textContent = `Generiere ${i + 1}/${selectedSongs.length}...`;
-        statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-amber-950/60 border-amber-500 text-amber-200 block";
-        statusBox.innerHTML = `<span>⏳ Generiere Text & Akkorde für (${i + 1}/${selectedSongs.length}): <strong>"${escapeHtml(item.title)}"</strong> (${escapeHtml(item.artist)})...</span>`;
+        const basePct = Math.floor((i / selectedSongs.length) * 100);
+        if (progress) progress.update(basePct, `Generiere (${i + 1}/${selectedSongs.length}): "${item.title}" (${item.artist})...`);
 
         try {
           const promptText = `Du bist ein professioneller Musikexperte für Akustikgitarre, Lagerfeuer und Singkreis-Repertoire.
@@ -3460,8 +3554,7 @@ WICHTIG für "content":
       btnText.textContent = "✨ Ausgewählte Songs generieren";
 
       if (successCount > 0) {
-        statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-emerald-950/80 border-emerald-500 text-emerald-200 block";
-        statusBox.innerHTML = `<span>🎉 ${successCount} Song${successCount > 1 ? 's wurden' : ' wurde'} erfolgreich zur Community hinzugefügt!</span>`;
+        if (progress) progress.complete(`🎉 ${successCount} Song${successCount > 1 ? 's wurden' : ' wurde'} erfolgreich generiert!`);
         
         setTimeout(() => {
           closeAddSongModal();
