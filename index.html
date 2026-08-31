@@ -590,7 +590,7 @@
         <div class="flex items-center gap-1.5 shrink-0">
           <!-- Auto-Scroll -->
           <button id="autoScrollBtn" onclick="toggleAutoScroll()" class="px-2.5 py-1 rounded-lg bg-stone-950 text-white font-bold text-xs flex items-center gap-1">
-            <span id="scrollIcon">⬇</span> Scroll
+            <span id="scrollIcon">⬇</span> <span id="autoScrollBtnText">Scroll</span>
           </button>
 
           <!-- Akkorde Ein/Aus -->
@@ -645,6 +645,12 @@
 
       </div>
 
+    </div>
+
+    <!-- Floating Scroll Speed Indicator -->
+    <div id="scrollSpeedIndicator" class="fixed bottom-6 right-6 z-[120] bg-stone-950/90 border border-amber-500/80 text-amber-400 font-mono font-bold text-xs px-3.5 py-2 rounded-full shadow-2xl transition duration-300 opacity-0 pointer-events-none flex items-center gap-1.5 backdrop-blur-md">
+      <span>⚡ Scroll-Tempo:</span>
+      <span id="scrollSpeedDisplay" class="font-black">1.0x</span>
     </div>
 
   </div>
@@ -2217,6 +2223,7 @@
       renderSongList();
       updateFavCount();
       initFirebaseSync();
+      initScrollSpeedGestureListeners();
 
       // 1 Sekunde groß anzeigen beim Starten der App
       setTimeout(() => {
@@ -2750,7 +2757,14 @@
       renderSongLyrics();
     }
 
-    // ==================== AUTO-SCROLL ====================
+    // ==================== AUTO-SCROLL MIT DYNAMISCHER GESCHWINDIGKEIT ====================
+    let autoScrollSpeed = 1.0; // Standard 1.0x (Skala 0.3x bis 4.0x)
+    let autoScrollAnimId = null;
+    let lastScrollTime = 0;
+    let scrollSubPixelAcc = 0;
+    let speedIndicatorTimer = null;
+    let touchStartY = null;
+
     function toggleAutoScroll() {
       if (isAutoScrolling) stopAutoScroll();
       else startAutoScroll();
@@ -2760,32 +2774,128 @@
       isAutoScrolling = true;
       const btn = document.getElementById("autoScrollBtn");
       const icon = document.getElementById("scrollIcon");
-      btn.classList.add("bg-amber-600", "text-stone-950");
-      btn.classList.remove("bg-stone-950", "text-white");
-      icon.textContent = "⏸";
+      const btnText = document.getElementById("autoScrollBtnText");
+      if (btn) {
+        btn.classList.add("bg-amber-600", "text-stone-950");
+        btn.classList.remove("bg-stone-950", "text-white");
+      }
+      if (icon) icon.textContent = "⏸";
+      if (btnText) btnText.textContent = `Scroll (${autoScrollSpeed.toFixed(1)}x)`;
 
       const container = document.getElementById("modalScrollArea");
-      autoScrollInterval = setInterval(() => {
-        container.scrollTop += 1;
+      lastScrollTime = performance.now();
+      scrollSubPixelAcc = 0;
+
+      showScrollSpeedIndicator(`Auto-Scroll aktiv (${autoScrollSpeed.toFixed(1)}x)`);
+
+      function stepScroll(now) {
+        if (!isAutoScrolling) return;
+        const dt = Math.min(0.1, (now - lastScrollTime) / 1000);
+        lastScrollTime = now;
+
+        // Basisgeschwindigkeit: 24 Pixel pro Sekunde bei 1.0x
+        const pxPerSecond = 24 * autoScrollSpeed;
+        scrollSubPixelAcc += pxPerSecond * dt;
+
+        if (scrollSubPixelAcc >= 1) {
+          const move = Math.floor(scrollSubPixelAcc);
+          container.scrollTop += move;
+          scrollSubPixelAcc -= move;
+        }
+
         if (container.scrollTop + container.clientHeight >= container.scrollHeight - 5) {
           stopAutoScroll();
+          showToast("Ende des Songs erreicht 🎶");
+          return;
         }
-      }, 50);
+
+        autoScrollAnimId = requestAnimationFrame(stepScroll);
+      }
+
+      autoScrollAnimId = requestAnimationFrame(stepScroll);
     }
 
     function stopAutoScroll() {
       isAutoScrolling = false;
-      if (autoScrollInterval) {
-        clearInterval(autoScrollInterval);
-        autoScrollInterval = null;
+      if (autoScrollAnimId) {
+        cancelAnimationFrame(autoScrollAnimId);
+        autoScrollAnimId = null;
       }
       const btn = document.getElementById("autoScrollBtn");
       const icon = document.getElementById("scrollIcon");
+      const btnText = document.getElementById("autoScrollBtnText");
       if (btn && icon) {
         btn.classList.remove("bg-amber-600", "text-stone-950");
         btn.classList.add("bg-stone-950", "text-white");
         icon.textContent = "⬇";
+        if (btnText) btnText.textContent = "Scroll";
       }
+    }
+
+    // Geschwindigkeit dynamisch variieren beim Wischen oder Scrollen
+    function adjustAutoScrollSpeed(delta) {
+      if (!isAutoScrolling) return;
+      const oldSpeed = autoScrollSpeed;
+      autoScrollSpeed = Math.max(0.3, Math.min(4.0, +(autoScrollSpeed + delta).toFixed(1)));
+      
+      const btnText = document.getElementById("autoScrollBtnText");
+      if (btnText) btnText.textContent = `Scroll (${autoScrollSpeed.toFixed(1)}x)`;
+
+      const directionText = autoScrollSpeed > oldSpeed ? "Schneller ⏩" : "Langsamer ⏪";
+      showScrollSpeedIndicator(`Tempo: ${autoScrollSpeed.toFixed(1)}x (${directionText})`);
+    }
+
+    function showScrollSpeedIndicator(text) {
+      const indicator = document.getElementById("scrollSpeedIndicator");
+      const display = document.getElementById("scrollSpeedDisplay");
+      if (!indicator) return;
+
+      if (display) display.textContent = `${autoScrollSpeed.toFixed(1)}x`;
+      indicator.innerHTML = `<span>⚡</span> <span>${escapeHtml(text)}</span>`;
+      indicator.style.opacity = "1";
+
+      if (speedIndicatorTimer) clearTimeout(speedIndicatorTimer);
+      speedIndicatorTimer = setTimeout(() => {
+        if (indicator) indicator.style.opacity = "0";
+      }, 1600);
+    }
+
+    function initScrollSpeedGestureListeners() {
+      const scrollArea = document.getElementById("modalScrollArea");
+      if (!scrollArea) return;
+
+      // 1. Mausrad während Auto-Scroll variiert das Tempo
+      scrollArea.addEventListener("wheel", (e) => {
+        if (!isAutoScrolling) return;
+        // e.deltaY > 0 -> Runterscrollen (User will schneller sein)
+        // e.deltaY < 0 -> Hochscrollen (User will langsamer sein / zurück)
+        if (e.deltaY > 15) {
+          adjustAutoScrollSpeed(+0.2);
+        } else if (e.deltaY < -15) {
+          adjustAutoScrollSpeed(-0.2);
+        }
+      }, { passive: true });
+
+      // 2. Touch-Geste auf Smartphones/Tablets während Auto-Scroll
+      scrollArea.addEventListener("touchstart", (e) => {
+        if (!isAutoScrolling || e.touches.length === 0) return;
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      scrollArea.addEventListener("touchend", (e) => {
+        if (!isAutoScrolling || touchStartY === null || e.changedTouches.length === 0) return;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diff = touchStartY - touchEndY;
+        touchStartY = null;
+
+        // Wisch nach oben (diff > 35) -> Seite scrollt nach unten -> Tempo erhöhen
+        // Wisch nach unten (diff < -35) -> Seite scrollt nach oben -> Tempo verringern
+        if (diff > 35) {
+          adjustAutoScrollSpeed(+0.25);
+        } else if (diff < -35) {
+          adjustAutoScrollSpeed(-0.25);
+        }
+      }, { passive: true });
     }
 
     // ==================== METRONOM ====================
