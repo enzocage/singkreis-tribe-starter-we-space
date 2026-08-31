@@ -3207,12 +3207,12 @@
       }
 
       if (bright) {
-        // Zunächst voll sichtbar (100%) bei Interaktion
+        // Zunächst voll sichtbar (100% Deckkraft / 0% Transparenz)
         widget.style.opacity = "1";
-        // Nach 2 Sekunden ohne User-Interaktion auf 80% Transparenz (20% Deckkraft) ausfaden
+        // Nach exakt 2 Sekunden ohne User-Interaktion auf 80% Transparenz (20% Deckkraft) ausfaden
         scrollSpeedWidgetTimer = setTimeout(() => {
           if (isAutoScrolling) {
-            widget.style.opacity = "0.20"; // 80% Transparenz / 20% Deckkraft
+            widget.style.opacity = "0.20"; // 80% Transparenz
           } else {
             widget.style.opacity = "0";
             widget.style.pointerEvents = "none";
@@ -3220,6 +3220,7 @@
         }, 2000);
       } else {
         widget.style.opacity = isAutoScrolling ? "0.20" : "0";
+        if (!isAutoScrolling) widget.style.pointerEvents = "none";
       }
     }
 
@@ -3237,14 +3238,10 @@
 
     function initScrollSpeedGestureListeners() {
       const scrollArea = document.getElementById("modalScrollArea");
+      const widget = document.getElementById("scrollSpeedWidget");
       if (!scrollArea) return;
 
-      // 1. Manuelles Nachscrollen durch den User aktiviert das Tempo-Widget
-      scrollArea.addEventListener("scroll", () => {
-        if (!isAutoScrolling || isProgrammaticScroll) return;
-        showScrollSpeedWidget(true);
-      }, { passive: true });
-
+      // 1. Manuelle User-Eingaben (Mausrad, Touch) leuchten das Tempo-Widget für 2s auf 100% auf
       scrollArea.addEventListener("wheel", (e) => {
         if (!isAutoScrolling || e.ctrlKey || e.metaKey) return;
         showScrollSpeedWidget(true);
@@ -3254,6 +3251,12 @@
         if (!isAutoScrolling || e.touches.length > 1) return;
         showScrollSpeedWidget(true);
       }, { passive: true });
+
+      if (widget) {
+        widget.addEventListener("mouseenter", () => {
+          if (isAutoScrolling) showScrollSpeedWidget(true);
+        });
+      }
 
       // 2. Double-Click auf den Liedtext startet/stoppt Scrollen (Desktop)
       scrollArea.addEventListener("dblclick", (e) => {
