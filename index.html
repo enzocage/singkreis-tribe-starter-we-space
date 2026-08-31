@@ -217,18 +217,18 @@
             <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-[10px] text-amber-400 hover:underline">Gratis Key erstellen ↗</a>
           </div>
           <input 
-            type="text" 
+            type="password" 
             id="geminiApiKey" 
-            placeholder="AIzaSy... (Wird sicher im Browser gespeichert)" 
+            placeholder="•••••••••••••••• (API Key ist sicher geschützt)" 
             autocomplete="off"
             autocorrect="off"
             autocapitalize="off"
             spellcheck="false"
             data-1p-ignore="true"
             data-lpignore="true"
-            class="w-full px-3 py-2 bg-stone-900 border border-stone-700 focus:border-amber-500 rounded-lg text-xs text-stone-200 placeholder-stone-600 font-mono focus:outline-none"
+            class="w-full px-3 py-2 bg-stone-900 border border-stone-700 focus:border-amber-500 rounded-lg text-xs text-stone-200 placeholder-stone-500 font-mono focus:outline-none"
           >
-          <p class="text-[10px] text-stone-500">Wird automatisch aus der <code>.env</code> Datei oder diesem Feld bezogen.</p>
+          <p class="text-[10px] text-stone-500">Wird automatisch aus der <code>.env</code> Datei bezogen und niemals im Klartext angezeigt.</p>
         </div>
       </form>
 
@@ -3077,9 +3077,16 @@
       if (accordion) accordion.classList.add("hidden");
 
       if (activeKey && activeKey.length > 5) {
-        if (keyInput) keyInput.value = activeKey;
+        if (keyInput) {
+          keyInput.value = "";
+          keyInput.placeholder = "•••••••••••••••• (API Key ist aktiv & geschützt)";
+        }
         if (activePill) activePill.classList.remove("hidden");
       } else {
+        if (keyInput) {
+          keyInput.value = "";
+          keyInput.placeholder = "AIzaSy... (API Key hier eingeben)";
+        }
         if (activePill) activePill.classList.add("hidden");
       }
 
