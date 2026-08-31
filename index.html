@@ -2852,7 +2852,7 @@
     }
 
     // ==================== AUTO-SCROLL MIT HÄNDISCHEM TEMPO-WIDGET ====================
-    let autoScrollSpeed = 1.0; // Standard 1.0x (Skala 0.2x bis 4.0x)
+    let autoScrollSpeed = 1.0; // Standard 1.0x (Skala 0.2x bis 10.0x)
     let autoScrollAnimId = null;
     let lastScrollTime = 0;
     let scrollSubPixelAcc = 0;
@@ -2929,9 +2929,10 @@
       hideScrollSpeedWidget();
     }
 
-    // Händische Anpassung durch den User über das Tempo-Widget
+    // Händische Anpassung durch den User über das Tempo-Widget (bis 10x)
     function adjustAutoScrollSpeedManual(delta) {
-      autoScrollSpeed = Math.max(0.2, Math.min(4.0, +(autoScrollSpeed + delta).toFixed(1)));
+      const step = autoScrollSpeed >= 3.0 ? (delta > 0 ? 0.5 : -0.5) : delta;
+      autoScrollSpeed = Math.max(0.2, Math.min(10.0, +(autoScrollSpeed + step).toFixed(1)));
       
       const widgetValue = document.getElementById("scrollSpeedWidgetValue");
       if (widgetValue) widgetValue.textContent = `${autoScrollSpeed.toFixed(1)}x`;
