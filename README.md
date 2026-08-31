@@ -46,6 +46,7 @@ Scanne den QR-Code mit deinem Smartphone, um die Singkreis-App sofort im mobilen
 * Vollständige Sammlung von 673 Chants, Herzensliedern & Mantren (Deva Premal, Krishna Das, May There Always Be Angels, u.v.m.).
 * Schnelle Volltextsuche und Zufalls-Button (`🔀 Zufällig`).
 * Ein Klick auf ein Mantra füllt sofort die AI-Suche aus, um Text & Gitarrenakkorde zu generieren.
+* *Hinweis zum reflektierten Umgang:* Das rhythmische Wiederholen von Mantren und Texten wirkt über kognitive und suggestive Mechanismen direkt auf das Unterbewusstsein. Bei regelmäßiger und intensiver Anwendung können sich sprachliche Muster, Glaubenssätze und emotionale Zustände tief im Denken verankern. Achte daher auf einen eigenverantwortlichen und reflektierten Umgang.
 
 ### 🤖 AI Song-Finder & Generator (Google Gemini)
 * **2-Schritt-Suche:** Recherchiert zuerst den passenden Titel, Interpreten und Erscheinungsjahr – erst bei Bestätigung werden vollständige Strophen, Refrains und präzise Gitarren-Akkorde generiert.
