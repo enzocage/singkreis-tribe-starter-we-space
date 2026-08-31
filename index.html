@@ -648,7 +648,7 @@
     </div>
 
     <!-- Floating Scroll-Tempo Widget (Schneller / Langsamer bei manuellem Nachscrollen) -->
-    <div id="scrollSpeedWidget" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] bg-stone-950/95 border-2 border-amber-500 text-stone-100 px-3.5 py-2 rounded-2xl shadow-2xl transition-all duration-500 ease-out opacity-0 pointer-events-none flex items-center gap-2.5 backdrop-blur-md select-none">
+    <div id="scrollSpeedWidget" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] bg-stone-950/95 border-2 border-amber-500 text-stone-100 px-3.5 py-2 rounded-2xl shadow-2xl transition-all duration-500 ease-out opacity-0 pointer-events-none flex items-center gap-2.5 backdrop-blur-md select-none" onclick="event.stopPropagation()">
       <div class="flex items-center gap-1 font-mono">
         <span class="text-amber-400 text-xs sm:text-sm">⚡</span>
         <span class="text-[10px] sm:text-xs text-stone-400 font-bold uppercase">Tempo:</span>
@@ -656,15 +656,15 @@
       </div>
 
       <div class="flex items-center gap-1">
-        <button type="button" onclick="adjustAutoScrollSpeedManual(-0.2)" class="px-2.5 py-1.5 bg-stone-800 hover:bg-stone-700 active:bg-amber-500 active:text-stone-950 text-amber-300 font-bold text-xs rounded-xl border border-stone-700 flex items-center gap-1 transition active:scale-95 shadow">
+        <button type="button" onclick="event.stopPropagation(); adjustAutoScrollSpeedManual(-0.2)" class="px-2.5 py-1.5 bg-stone-800 hover:bg-stone-700 active:bg-amber-500 active:text-stone-950 text-amber-300 font-bold text-xs rounded-xl border border-stone-700 flex items-center gap-1 transition active:scale-95 shadow cursor-pointer">
           <span>⏪</span> Langsamer
         </button>
-        <button type="button" onclick="adjustAutoScrollSpeedManual(+0.2)" class="px-2.5 py-1.5 bg-stone-800 hover:bg-stone-700 active:bg-amber-500 active:text-stone-950 text-amber-300 font-bold text-xs rounded-xl border border-stone-700 flex items-center gap-1 transition active:scale-95 shadow">
+        <button type="button" onclick="event.stopPropagation(); adjustAutoScrollSpeedManual(+0.2)" class="px-2.5 py-1.5 bg-stone-800 hover:bg-stone-700 active:bg-amber-500 active:text-stone-950 text-amber-300 font-bold text-xs rounded-xl border border-stone-700 flex items-center gap-1 transition active:scale-95 shadow cursor-pointer">
           <span>⏩</span> Schneller
         </button>
       </div>
 
-      <button type="button" onclick="hideScrollSpeedWidget()" class="text-stone-400 hover:text-white text-xs px-1 py-0.5 rounded ml-0.5" title="Schließen">
+      <button type="button" onclick="event.stopPropagation(); hideScrollSpeedWidget()" class="text-stone-400 hover:text-white text-xs px-2 py-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-700 ml-1 cursor-pointer font-bold transition flex items-center justify-center" title="Schließen">
         ✕
       </button>
     </div>
@@ -2633,6 +2633,7 @@
       currentTransposition = 0;
       stopAutoScroll();
       stopMetronome();
+      enterFullscreen();
 
       applyDarkModeUI();
       document.getElementById("modalTitle").textContent = activeSong.title;
@@ -2856,6 +2857,7 @@
     let lastScrollTime = 0;
     let scrollSubPixelAcc = 0;
     let scrollSpeedWidgetTimer = null;
+    let isProgrammaticScroll = false;
 
     function toggleAutoScroll() {
       if (isAutoScrolling) stopAutoScroll();
@@ -2891,7 +2893,9 @@
 
         if (scrollSubPixelAcc >= 1) {
           const move = Math.floor(scrollSubPixelAcc);
+          isProgrammaticScroll = true;
           container.scrollTop += move;
+          setTimeout(() => { isProgrammaticScroll = false; }, 0);
           scrollSubPixelAcc -= move;
         }
 
@@ -2947,7 +2951,11 @@
       widget.style.opacity = "1";
       widget.style.pointerEvents = "auto";
 
-      if (scrollSpeedWidgetTimer) clearTimeout(scrollSpeedWidgetTimer);
+      if (scrollSpeedWidgetTimer) {
+        clearTimeout(scrollSpeedWidgetTimer);
+        scrollSpeedWidgetTimer = null;
+      }
+
       if (autoHide) {
         scrollSpeedWidgetTimer = setTimeout(() => {
           hideScrollSpeedWidget();
@@ -2956,6 +2964,10 @@
     }
 
     function hideScrollSpeedWidget() {
+      if (scrollSpeedWidgetTimer) {
+        clearTimeout(scrollSpeedWidgetTimer);
+        scrollSpeedWidgetTimer = null;
+      }
       const widget = document.getElementById("scrollSpeedWidget");
       if (widget) {
         widget.style.opacity = "0";
@@ -2967,24 +2979,20 @@
       const scrollArea = document.getElementById("modalScrollArea");
       if (!scrollArea) return;
 
-      // Wenn der User per Hand nachscrollt oder wischt während Auto-Scroll aktiv ist:
-      // Tempo-Widget mit Schneller/Langsamer Buttons für händische Wahl anzeigen!
+      // Nur bei ECHTEM manuellem Scrollen durch den User aktivieren (nicht beim programmatischen Auto-Scroll)
       scrollArea.addEventListener("scroll", () => {
-        if (isAutoScrolling) {
-          showScrollSpeedWidget(true);
-        }
+        if (!isAutoScrolling || isProgrammaticScroll) return;
+        showScrollSpeedWidget(true);
       }, { passive: true });
 
-      scrollArea.addEventListener("wheel", () => {
-        if (isAutoScrolling) {
-          showScrollSpeedWidget(true);
-        }
+      scrollArea.addEventListener("wheel", (e) => {
+        if (!isAutoScrolling || e.ctrlKey || e.metaKey) return;
+        showScrollSpeedWidget(true);
       }, { passive: true });
 
-      scrollArea.addEventListener("touchstart", () => {
-        if (isAutoScrolling) {
-          showScrollSpeedWidget(true);
-        }
+      scrollArea.addEventListener("touchstart", (e) => {
+        if (!isAutoScrolling || e.touches.length > 1) return;
+        showScrollSpeedWidget(true);
       }, { passive: true });
     }
 
@@ -3069,7 +3077,8 @@
       return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    function toggleFullscreen() {
+    // ==================== FULLSCREEN AUTO-START & TOGGLE ====================
+    function enterFullscreen() {
       if (!document.fullscreenElement && !document.webkitFullscreenElement) {
         const docEl = document.documentElement;
         if (docEl.requestFullscreen) {
@@ -3077,6 +3086,12 @@
         } else if (docEl.webkitRequestFullscreen) {
           docEl.webkitRequestFullscreen();
         }
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        enterFullscreen();
         showToast("Vollbild aktiviert ⛶");
       } else {
         if (document.exitFullscreen) {
@@ -3087,6 +3102,10 @@
         showToast("Vollbild beendet");
       }
     }
+
+    // Automatisch beim ersten Klick / Tippen auf die App Vollbild aktivieren
+    document.addEventListener("click", () => enterFullscreen(), { once: true });
+    document.addEventListener("touchstart", () => enterFullscreen(), { once: true });
 
     document.addEventListener("fullscreenchange", updateFullscreenUI);
     document.addEventListener("webkitfullscreenchange", updateFullscreenUI);
