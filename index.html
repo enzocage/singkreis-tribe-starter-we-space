@@ -675,16 +675,16 @@
       </button>
     </div>
 
-    <!-- Floating Font Size Indicator -->
-    <div id="fontSizeIndicator" class="fixed bottom-6 right-6 z-[120] bg-stone-950/90 border border-amber-500/80 text-amber-400 font-mono font-bold text-xs px-3.5 py-2 rounded-full shadow-2xl transition duration-300 opacity-0 pointer-events-none flex items-center gap-1.5 backdrop-blur-md">
+    <!-- Floating Font Size Indicator (Höher positioniert, damit keine Überlappung mit dem Tempo-Widget entsteht) -->
+    <div id="fontSizeIndicator" class="fixed bottom-20 right-4 sm:right-6 sm:bottom-24 z-[120] bg-stone-950/95 border border-amber-500/80 text-amber-400 font-mono font-bold text-xs sm:text-sm px-4 py-2 rounded-full shadow-2xl transition duration-300 opacity-0 pointer-events-none flex items-center gap-1.5 backdrop-blur-md">
       <span>🔤 Textgröße:</span>
       <span id="fontSizeDisplay" class="font-black">23px</span>
     </div>
 
   </div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-14 left-1/2 -translate-x-1/2 bg-amber-500 text-stone-950 px-4 py-2 rounded-full font-black text-xs shadow-2xl transition duration-200 opacity-0 pointer-events-none z-50">
+  <!-- Toast Notification (Oben zentriert, damit unten Platz für Scroll-Widgets bleibt) -->
+  <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-amber-500 text-stone-950 px-4 py-2 rounded-full font-black text-xs shadow-2xl transition duration-200 opacity-0 pointer-events-none z-[130]">
     <span id="toastMsg">Hinweis</span>
   </div>
 
