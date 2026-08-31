@@ -599,16 +599,8 @@
           </button>
         </div>
 
-        <!-- RECHTS: Tonart, Textgröße & Dark Mode -->
+        <!-- RECHTS: Textgröße, Dark Mode & Tonart ganz rechts -->
         <div class="flex items-center gap-1.5 shrink-0">
-          <!-- Tonart +/- -->
-          <div class="flex items-center gap-0.5 bg-stone-950 text-white rounded-lg px-2 py-1 font-bold">
-            <span class="text-[10px] text-amber-400 uppercase mr-1">Ton:</span>
-            <button onclick="transpose(-1)" class="w-6 h-6 rounded bg-stone-800 active:bg-stone-700 text-amber-400 font-black text-sm flex items-center justify-center">-</button>
-            <span id="currentKeyDisplay" class="font-mono font-black text-amber-400 text-base w-7 text-center">C</span>
-            <button onclick="transpose(1)" class="w-6 h-6 rounded bg-stone-800 active:bg-stone-700 text-amber-400 font-black text-sm flex items-center justify-center">+</button>
-          </div>
-
           <!-- Schriftgröße A- / A+ -->
           <div class="flex items-center gap-0.5 bg-stone-950 text-white rounded-lg px-2 py-1 font-bold">
             <span class="text-[10px] text-amber-400 uppercase mr-1">Text:</span>
@@ -620,6 +612,14 @@
           <button onclick="toggleDarkMode()" class="p-1 px-2 rounded-lg bg-stone-950 text-amber-400 font-bold text-xs flex items-center gap-1" title="Dark / Light Mode">
             <span class="modalDarkModeIcon">🌙</span>
           </button>
+
+          <!-- Tonart +/- (Ganz rechts) -->
+          <div class="flex items-center gap-0.5 bg-stone-950 text-white rounded-lg px-2 py-1 font-bold">
+            <span class="text-[10px] text-amber-400 uppercase mr-1">Ton:</span>
+            <button onclick="transpose(-1)" class="w-6 h-6 rounded bg-stone-800 active:bg-stone-700 text-amber-400 font-black text-sm flex items-center justify-center">-</button>
+            <span id="currentKeyDisplay" class="font-mono font-black text-amber-400 text-base w-7 text-center">C</span>
+            <button onclick="transpose(1)" class="w-6 h-6 rounded bg-stone-800 active:bg-stone-700 text-amber-400 font-black text-sm flex items-center justify-center">+</button>
+          </div>
         </div>
 
       </div>
