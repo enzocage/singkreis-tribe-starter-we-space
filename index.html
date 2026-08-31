@@ -211,10 +211,10 @@
         </div>
 
         <!-- Einklappbarer API-Key Bereich (Standardmäßig komplett versteckt) -->
-        <div id="apiKeyAccordion" class="hidden mt-3 p-3 bg-stone-950/90 border border-stone-800 rounded-xl space-y-2 text-xs">
+        <div id="apiKeyAccordion" class="hidden mt-3 p-3 bg-stone-950/90 border border-stone-800 rounded-xl space-y-2.5 text-xs">
           <div class="flex items-center justify-between">
             <label class="font-bold text-stone-400 uppercase tracking-wider text-[10px]">Google Gemini API Key</label>
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-[10px] text-amber-400 hover:underline">Gratis Key erstellen ↗</a>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-[10px] text-amber-400 font-bold hover:underline">Gratis Key erstellen ↗</a>
           </div>
           <input 
             type="password" 
@@ -228,7 +228,7 @@
             data-lpignore="true"
             class="w-full px-3 py-2 bg-stone-900 border border-stone-700 focus:border-amber-500 rounded-lg text-xs text-stone-200 placeholder-stone-500 font-mono focus:outline-none"
           >
-          <p class="text-[10px] text-stone-500">Wird automatisch aus der <code>.env</code> Datei bezogen und niemals im Klartext angezeigt.</p>
+          <p class="text-[11px] text-stone-400 leading-snug">Falls das AI-Kontingent verbraucht ist, gib hier deinen eigenen Google Gemini API Key ein. <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-amber-400 font-bold hover:underline">Hier kostenlosen API-Key erstellen ↗</a></p>
         </div>
       </form>
 
