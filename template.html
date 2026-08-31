@@ -1537,6 +1537,15 @@
         htmlLines.push(`<div class="lyric-line">${escapeHtml(raw)}</div>`);
       });
 
+      // Custom Song Image under text if present (e.g. axtimkopf.png)
+      if (song && song.image) {
+        htmlLines.push(`
+          <div style="margin:36px auto 18px;max-width:520px;text-align:center;">
+            <img src="${escapeHtml(song.image)}" alt="${escapeHtml(song.title)}" style="width:100%;max-width:480px;height:auto;border-radius:var(--radius-2xl);box-shadow:0 16px 48px rgba(0,0,0,0.7);display:inline-block;border:1px solid rgba(255,255,255,0.08);">
+          </div>
+        `);
+      }
+
       bodyEl.style.fontSize = currentFontSize + 'px';
       bodyEl.innerHTML = htmlLines.join('');
 

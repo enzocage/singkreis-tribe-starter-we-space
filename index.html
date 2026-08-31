@@ -936,6 +936,7 @@
     "tempo": 87,
     "popularity": 100,
     "category": "lagerfeuer",
+    "image": "axtimkopf.png",
     "message": "Die phonetisch-geniale Tribe Starter Wonderwall-Parodie: Silbengenau, lautmalerisch auf Oasis abgestimmt und Platz 1 im Songbook!",
     "content": "\n[Strophe 1]\nEm7                 G\nTribe Star-ter, Kopf-weh, Beil tut weh,\n         Dsus4               A7sus4\ndas der Dok-tor roh mit Axt zur Ruh\nEm7                 G\nBeil raus! Du sollst schon Schmerz-Hau\n        Dsus4              A7sus4\nre-gi-strier'n, was der Dok-tor tut\nEm7                  G           Dsus4         A7sus4\nIch dröhn' bis tief, das kann nie-mand hier fühl'n,\n                               Cadd9   Dsus4   A7sus4\ndas Weh, ich tu so laut: du raus\n\n[Strophe 2]\nEm7               G\nWe Space, das Wort ist an der Stirn,\n          Dsus4                 A7sus4\ndass das Fie-ber im Ohr hart ist aus\nEm7                 G\nIch schwör', du hörst es all be-vor,\n         Dsus4               A7sus4\ndoch du nie-mals rich-tig hast 'nen Hau\nEm7                  G           Dsus4         A7sus4\nIch dröhn' bis tief, das kann nie-mand hier fühl'n,\n                               Em7   G   Dsus4   A7sus4\ndas Weh, ich tu so laut: du raus\n\n[Pre-Chorus 1]\n      Cadd9             Dsus4            Em7\nUnd all die Not, wir hack-ten wach, ver-wun-det\n      Cadd9             Dsus4            Em7\nUnd all das Leid, das As-pi-rin nicht en-det\nCadd9              Dsus4\nDa sind man-che Ding', das ich würd'\nG        D/F#     Em7       D        A7sus4\nleicht zu sa-gen dir, doch ich denk' nur: Au!\n\n[Refrain 1]\n       Cadd9      Dsus4      Em7\nBe-kloppt, mein Beil...\n              Cadd9    Dsus4    Em7\nDu Gott, nah bei, der Wund-arzt sägt mich\n       Cadd9      Dsus4      Em7\nUnd Arzt, der Stahl...\n           Cadd9    Dsus4    Em7\nBohr mir Wun-de voll!\n\n[Strophe 3]\nEm7                 G\nTut weh, was Kopf und Beil mir näht,\n         Dsus4               A7sus4\nBlut, der nie-mals zog es raus zu dir\nEm7                 G\nBeil raus! Du sollst schon Schmerz-Hau\n        Dsus4              A7sus4\nre-gi-strier'n, was du nicht zu tun\nEm7                  G           Dsus4         A7sus4\nIch dröhn' bis tief, das kann nie-mand hier fühl'n,\n                               Cadd9   Dsus4   A7sus4\ndas Weh, ich tu so laut: du raus\n\n[Pre-Chorus 2]\n      Cadd9             Dsus4            Em7\nUnd all die Not, die liegt zu dir, ver-wun-det\n      Cadd9             Dsus4            Em7\nUnd all das Leid, das leicht den Weg ver-blen-det\nCadd9              Dsus4\nDa sind man-che Ding', das ich würd'\nG        D/F#     Em7       D        A7sus4\nleicht zu sa-gen dir, doch ich denk' nur: Au!\n\n[Refrain 2]\n       Cadd9      Dsus4      Em7\nIch sag: Mein Beil...\n              Cadd9    Dsus4    Em7\nDu Gott, nah bei, der Wund-arzt sägt mich\n       Cadd9      Dsus4      Em7\nUnd Arzt, der Stahl...\n           Cadd9    Dsus4    Em7\nBohr mir Wun-de voll!\n\n[Refrain 3]\n       Cadd9      Dsus4      Em7\nIch sag: Mein Beil... (Ich sag: mein Beil)\n              Cadd9    Dsus4    Em7\nDu Gott, nah bei, der Wund-arzt sägt mich\n       Cadd9      Dsus4      Em7\nUnd Arzt, der Stahl...\n           Cadd9    Dsus4    Em7\nBohr mir Wun-de voll!\n\n[Outro]\n       Cadd9      Dsus4      Em7\nIch sag: Mein Beil... (Ich sag: mein Beil)\n              Cadd9    Dsus4    Em7\nDu Gott, nah bei, der Wund-arzt sägt mich (der sägt mich)\n              Cadd9    Dsus4    Em7\nDu Gott, nah bei, der Wund-arzt sägt mich (der sägt mich)\n              Cadd9    Dsus4    Em7\nDu Gott, nah bei, der Wund-arzt sägt mich (der sägt mich)\n"
   },
@@ -10593,6 +10594,15 @@
         // Standard lyric line
         htmlLines.push(`<div class="lyric-line">${escapeHtml(raw)}</div>`);
       });
+
+      // Custom Song Image under text if present (e.g. axtimkopf.png)
+      if (song && song.image) {
+        htmlLines.push(`
+          <div style="margin:36px auto 18px;max-width:520px;text-align:center;">
+            <img src="${escapeHtml(song.image)}" alt="${escapeHtml(song.title)}" style="width:100%;max-width:480px;height:auto;border-radius:var(--radius-2xl);box-shadow:0 16px 48px rgba(0,0,0,0.7);display:inline-block;border:1px solid rgba(255,255,255,0.08);">
+          </div>
+        `);
+      }
 
       bodyEl.style.fontSize = currentFontSize + 'px';
       bodyEl.innerHTML = htmlLines.join('');

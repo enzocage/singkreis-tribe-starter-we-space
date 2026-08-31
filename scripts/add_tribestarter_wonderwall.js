@@ -18,6 +18,7 @@ const tribestarterWonderwall = {
   "tempo": 87,
   "popularity": 100,
   "category": "lagerfeuer",
+  "image": "axtimkopf.png",
   "message": "Die phonetisch-geniale Tribe Starter Wonderwall-Parodie: Silbengenau, lautmalerisch auf Oasis abgestimmt und Platz 1 im Songbook!",
   "content": `
 [Strophe 1]
@@ -135,4 +136,4 @@ if (existingIdx !== -1) {
 const newSongsCode = 'const songs = ' + JSON.stringify(songs, null, 2) + ';';
 const updatedScript = dbScript.replace(match[0], newSongsCode);
 fs.writeFileSync(dbPath, updatedScript, 'utf8');
-console.log('Successfully updated build_songs_database.js with phonetic Wonderwall parody!');
+console.log('Successfully updated build_songs_database.js with axtimkopf.png on Tribe Starter Wonderwall!');
