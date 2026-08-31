@@ -2939,14 +2939,7 @@
 
     function selectMantraToSearch(title, artist) {
       closeMantrasModal();
-      const searchInput = document.getElementById("searchInput");
-      if (searchInput) {
-        searchInput.value = title;
-        handleSearch(title);
-        searchInput.focus();
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      showToast(`Suche nach "${title}"`);
+      openAddSongModal(title);
     }
 
 
