@@ -355,6 +355,56 @@
     </div>
   </div>
 
+  <!-- ==================== SCREEN TIMEOUT / DISPLAY WAKE-LOCK TIP MODAL ==================== -->
+  <div id="screenTimeoutTipModal" class="fixed inset-0 z-[160] bg-stone-950/90 backdrop-blur-md hidden flex items-center justify-center p-4 select-none" onclick="closeScreenTimeoutTipModal()">
+    <div class="relative max-w-md w-full bg-stone-900 border-2 border-amber-500/80 rounded-2xl shadow-2xl p-5 text-stone-100 animate-scale-up" onclick="event.stopPropagation()">
+      <div class="flex items-center gap-3 mb-3 border-b border-stone-800 pb-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 font-bold flex items-center justify-center text-xl shadow">
+          💡
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white leading-tight">Display dunkelt ab beim Singen?</h3>
+          <p class="text-[11px] text-amber-400 font-semibold">Tipp für ungestörtes Musizieren</p>
+        </div>
+      </div>
+
+      <p class="text-xs text-stone-300 leading-relaxed mb-3">
+        Damit dein Display beim Singkreis nicht automatisch ausgeht, kannst du den Bildschirm-Timeout in deinen Handy-Einstellungen anpassen:
+      </p>
+
+      <div class="space-y-2.5 mb-4 text-xs">
+        <!-- iOS -->
+        <div class="bg-stone-950/80 border border-stone-800 rounded-xl p-3">
+          <div class="flex items-center gap-1.5 font-bold text-stone-200 mb-1">
+            <span>🍎</span> <span>iPhone / iPad:</span>
+          </div>
+          <p class="text-stone-400 text-[11px] leading-snug">
+            <span class="text-amber-300 font-mono font-semibold">Einstellungen</span> ➔ <span class="text-amber-300 font-mono font-semibold">Anzeige & Helligkeit</span> ➔ <span class="text-amber-300 font-mono font-semibold">Automatische Sperre</span> ➔ auf <strong class="text-white">„Nie“</strong> setzen.
+          </p>
+        </div>
+
+        <!-- Android -->
+        <div class="bg-stone-950/80 border border-stone-800 rounded-xl p-3">
+          <div class="flex items-center gap-1.5 font-bold text-stone-200 mb-1">
+            <span>🤖</span> <span>Android:</span>
+          </div>
+          <p class="text-stone-400 text-[11px] leading-snug">
+            <span class="text-amber-300 font-mono font-semibold">Einstellungen</span> ➔ <span class="text-amber-300 font-mono font-semibold">Display</span> ➔ <span class="text-amber-300 font-mono font-semibold">Bildschirm-Timeout</span> ➔ auf <strong class="text-white">10–30 Min.</strong> oder <strong class="text-white">„Aufmerksamkeitserkennung“</strong> setzen.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-2.5 bg-amber-950/40 border border-amber-500/30 rounded-xl text-[11px] text-amber-200/90 mb-4 flex items-center gap-2">
+        <span class="text-base">⚡</span>
+        <p>Die App hält dein Display per Web-WakeLock bereits zusätzlich aktiv, sofern dein Browser dies erlaubt.</p>
+      </div>
+
+      <button type="button" onclick="closeScreenTimeoutTipModal()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black rounded-xl text-xs shadow-lg transition active:scale-95 cursor-pointer">
+        ✅ Alles klar, verstanden
+      </button>
+    </div>
+  </div>
+
   
   <!-- ==================== MANTRAS & HEILSAME LIEDER MODAL ==================== -->
   <div id="mantrasModal" class="fixed inset-0 z-[125] bg-stone-950/95 backdrop-blur-md hidden flex flex-col justify-between p-2 sm:p-4 overflow-hidden" onclick="closeMantrasModal()">
@@ -2660,6 +2710,64 @@
       showToast(isDarkMode ? "Dark Mode aktiviert 🌙" : "Light Mode aktiviert ☀️");
     }
 
+    // ==================== SCREEN WAKE-LOCK & TIMEOUT TIP DETECTION ====================
+    let screenWakeLock = null;
+    let lastModalInteractionTime = Date.now();
+    let idleDimTapCount = 0;
+
+    async function requestScreenWakeLock() {
+      if ('wakeLock' in navigator) {
+        try {
+          screenWakeLock = await navigator.wakeLock.request('screen');
+        } catch (err) {
+          console.log('Wake Lock Error:', err);
+        }
+      }
+    }
+
+    function releaseScreenWakeLock() {
+      if (screenWakeLock) {
+        screenWakeLock.release().catch(() => {});
+        screenWakeLock = null;
+      }
+    }
+
+    document.addEventListener('visibilitychange', async () => {
+      const modal = document.getElementById('songModal');
+      if (document.visibilityState === 'visible' && modal && !modal.classList.contains('hidden')) {
+        await requestScreenWakeLock();
+      }
+    });
+
+    function recordScreenDimmingTap() {
+      if (localStorage.getItem("singkreis_screen_timeout_tip_dismissed")) return;
+      const modal = document.getElementById("songModal");
+      if (!modal || modal.classList.contains("hidden")) return;
+
+      const now = Date.now();
+      const idleSeconds = (now - lastModalInteractionTime) / 1000;
+      lastModalInteractionTime = now;
+
+      // Wenn der User nach einer Inaktivitätspause (ab 10 Sekunden) tippt:
+      if (idleSeconds >= 10) {
+        idleDimTapCount++;
+        if (idleDimTapCount >= 3) {
+          openScreenTimeoutTipModal();
+        }
+      }
+    }
+
+    function openScreenTimeoutTipModal() {
+      const modal = document.getElementById("screenTimeoutTipModal");
+      if (modal) modal.classList.remove("hidden");
+    }
+
+    function closeScreenTimeoutTipModal() {
+      const modal = document.getElementById("screenTimeoutTipModal");
+      if (modal) modal.classList.add("hidden");
+      localStorage.setItem("singkreis_screen_timeout_tip_dismissed", "true");
+    }
+
     // ==================== SONG MODAL ÖFFNEN & GROSS RENDERN ====================
     function openSongModal(id) {
       activeSong = getAllSongs().find(s => s.id === id);
@@ -2669,6 +2777,9 @@
       stopAutoScroll();
       stopMetronome();
       enterFullscreen();
+      requestScreenWakeLock();
+      lastModalInteractionTime = Date.now();
+      idleDimTapCount = 0;
 
       applyDarkModeUI();
       document.getElementById("modalTitle").textContent = activeSong.title;
@@ -2705,6 +2816,7 @@
       document.body.style.overflow = "auto";
       stopAutoScroll();
       stopMetronome();
+      releaseScreenWakeLock();
     }
 
     function renderSongLyrics() {
@@ -3085,6 +3197,9 @@
           lastTouchTapPos = { x: touch.clientX, y: touch.clientY };
         }
       }, { passive: false });
+
+      // 4. Erkennung von Taps zur Verhinderung von Screen-Dimming
+      scrollArea.addEventListener("pointerdown", recordScreenDimmingTap, { passive: true });
     }
 
     // ==================== METRONOM ====================
