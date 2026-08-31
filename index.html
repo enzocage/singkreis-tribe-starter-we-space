@@ -2316,7 +2316,6 @@
       let html = curatedSongs.map(song => renderSongCardHtml(song, false)).join("");
 
       // Abgetrennte Community-Sektion ganz unten
-      const allComm = getCommunitySongs();
       if (allComm.length > 0 || communitySongs.length > 0) {
         html += `
           <div class="mt-10 pt-6 border-t-2 border-dashed border-stone-800">
