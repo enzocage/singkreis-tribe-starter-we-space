@@ -318,7 +318,7 @@
       <div class="no-scrollbar" style="padding:0 20px 14px;display:flex;gap:8px;overflow-x:auto;">
         <button onclick="setFilter('all')" id="chip-all" style="padding:8px 16px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font-weight:700;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
           <span>Alle</span>
-          <span id="count-all" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">122</span>
+          <span id="count-all" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">208</span>
         </button>
 
         <button onclick="setFilter('fav')" id="chip-fav" style="padding:8px 14px;border-radius:var(--radius-full);background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--cream-dim);font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;" title="Favoriten">
@@ -329,6 +329,31 @@
         <button onclick="setFilter('community')" id="chip-community" style="padding:8px 16px;border-radius:var(--radius-full);background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--cream-dim);font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
           <span>Aus dem Kreis</span>
           <span id="count-community" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">0</span>
+        </button>
+
+        <button onclick="setFilter('lagerfeuer')" id="chip-lagerfeuer" style="padding:8px 16px;border-radius:var(--radius-full);background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--cream-dim);font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
+          <span>🔥 Lagerfeuer</span>
+          <span id="count-lagerfeuer" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">0</span>
+        </button>
+
+        <button onclick="setFilter('herz')" id="chip-herz" style="padding:8px 16px;border-radius:var(--radius-full);background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--cream-dim);font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
+          <span>❤️ Herz</span>
+          <span id="count-herz" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">0</span>
+        </button>
+
+        <button onclick="setFilter('deutsch')" id="chip-deutsch" style="padding:8px 16px;border-radius:var(--radius-full);background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--cream-dim);font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
+          <span>🎸 Deutsch</span>
+          <span id="count-deutsch" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">0</span>
+        </button>
+
+        <button onclick="setFilter('verbundenheit')" id="chip-verbundenheit" style="padding:8px 16px;border-radius:var(--radius-full);background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--cream-dim);font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
+          <span>🌱 Verbundenheit</span>
+          <span id="count-verbundenheit" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">0</span>
+        </button>
+
+        <button onclick="setFilter('mantren')" id="chip-mantren" style="padding:8px 16px;border-radius:var(--radius-full);background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--cream-dim);font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
+          <span>🕉️ Mantren</span>
+          <span id="count-mantren" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">0</span>
         </button>
       </div>
     </div>
@@ -1201,6 +1226,16 @@
           sectionTitle.textContent = 'Gemerkt (' + favorites.length + ')';
         } else if (activeFilter === 'community') {
           sectionTitle.textContent = 'Aus dem Kreis (' + communitySongs.length + ')';
+        } else if (activeFilter === 'lagerfeuer') {
+          sectionTitle.textContent = 'Lagerfeuer Klassiker';
+        } else if (activeFilter === 'herz') {
+          sectionTitle.textContent = 'Herz & Balladen';
+        } else if (activeFilter === 'deutsch') {
+          sectionTitle.textContent = 'Deutsch & Dialekt';
+        } else if (activeFilter === 'verbundenheit') {
+          sectionTitle.textContent = 'Verbundenheit & We-Space';
+        } else if (activeFilter === 'mantren') {
+          sectionTitle.textContent = 'Mantren & Chants';
         } else {
           sectionTitle.textContent = 'Liederbuch (' + SONGS.length + ')';
         }
@@ -1244,10 +1279,15 @@
         return;
       }
 
-      // Filtered mode (fav, community, or search)
+      // Filtered mode (fav, community, categories, or search)
       let filtered = all.filter(s => {
         if (activeFilter === 'fav' && !favorites.includes(s.id)) return false;
         if (activeFilter === 'community' && !s.isCommunity) return false;
+        if (activeFilter === 'lagerfeuer' && s.category !== 'lagerfeuer') return false;
+        if (activeFilter === 'herz' && s.category !== 'herz') return false;
+        if (activeFilter === 'deutsch' && s.lang !== 'DE' && s.category !== 'deutsch') return false;
+        if (activeFilter === 'verbundenheit' && s.category !== 'verbundenheit') return false;
+        if (activeFilter === 'mantren' && s.category !== 'mantren') return false;
 
         if (searchQuery) {
           const matchTitle = (s.title || '').toLowerCase().includes(searchQuery);
@@ -1302,13 +1342,28 @@
       const countAll = document.getElementById('count-all');
       const countFav = document.getElementById('count-fav');
       const countComm = document.getElementById('count-community');
+      const countLager = document.getElementById('count-lagerfeuer');
+      const countHerz = document.getElementById('count-herz');
+      const countDeutsch = document.getElementById('count-deutsch');
+      const countVerb = document.getElementById('count-verbundenheit');
+      const countMantren = document.getElementById('count-mantren');
       const commFooter = document.getElementById('communityFooterText');
 
       const commCount = all.filter(s => s.isCommunity).length;
+      const lagerCount = all.filter(s => s.category === 'lagerfeuer').length;
+      const herzCount = all.filter(s => s.category === 'herz').length;
+      const deutschCount = all.filter(s => s.lang === 'DE' || s.category === 'deutsch').length;
+      const verbCount = all.filter(s => s.category === 'verbundenheit').length;
+      const mantrenCount = all.filter(s => s.category === 'mantren').length;
 
       if (countAll) countAll.textContent = all.length;
       if (countFav) countFav.textContent = favorites.length;
       if (countComm) countComm.textContent = commCount;
+      if (countLager) countLager.textContent = lagerCount;
+      if (countHerz) countHerz.textContent = herzCount;
+      if (countDeutsch) countDeutsch.textContent = deutschCount;
+      if (countVerb) countVerb.textContent = verbCount;
+      if (countMantren) countMantren.textContent = mantrenCount;
       if (commFooter) commFooter.textContent = 'Aus dem Kreis · ' + commCount + ' Lieder';
     }
 
