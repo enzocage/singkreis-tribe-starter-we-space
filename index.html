@@ -647,10 +647,32 @@
 
     </div>
 
-    <!-- Floating Scroll Speed Indicator -->
-    <div id="scrollSpeedIndicator" class="fixed bottom-6 right-6 z-[120] bg-stone-950/90 border border-amber-500/80 text-amber-400 font-mono font-bold text-xs px-3.5 py-2 rounded-full shadow-2xl transition duration-300 opacity-0 pointer-events-none flex items-center gap-1.5 backdrop-blur-md">
-      <span>⚡ Scroll-Tempo:</span>
-      <span id="scrollSpeedDisplay" class="font-black">1.0x</span>
+    <!-- Floating Scroll-Tempo Widget (Schneller / Langsamer bei manuellem Nachscrollen) -->
+    <div id="scrollSpeedWidget" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] bg-stone-950/95 border-2 border-amber-500 text-stone-100 px-3.5 py-2 rounded-2xl shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2.5 backdrop-blur-md select-none">
+      <div class="flex items-center gap-1 font-mono">
+        <span class="text-amber-400 text-xs sm:text-sm">⚡</span>
+        <span class="text-[10px] sm:text-xs text-stone-400 font-bold uppercase">Tempo:</span>
+        <span id="scrollSpeedWidgetValue" class="text-xs sm:text-sm font-black text-amber-400 px-2 py-0.5 rounded-lg bg-stone-900 border border-stone-700 min-w-[42px] text-center">1.0x</span>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <button type="button" onclick="adjustAutoScrollSpeedManual(-0.2)" class="px-2.5 py-1.5 bg-stone-800 hover:bg-stone-700 active:bg-amber-500 active:text-stone-950 text-amber-300 font-bold text-xs rounded-xl border border-stone-700 flex items-center gap-1 transition active:scale-95 shadow">
+          <span>⏪</span> Langsamer
+        </button>
+        <button type="button" onclick="adjustAutoScrollSpeedManual(+0.2)" class="px-2.5 py-1.5 bg-stone-800 hover:bg-stone-700 active:bg-amber-500 active:text-stone-950 text-amber-300 font-bold text-xs rounded-xl border border-stone-700 flex items-center gap-1 transition active:scale-95 shadow">
+          <span>⏩</span> Schneller
+        </button>
+      </div>
+
+      <button type="button" onclick="hideScrollSpeedWidget()" class="text-stone-400 hover:text-white text-xs px-1 py-0.5 rounded ml-0.5" title="Schließen">
+        ✕
+      </button>
+    </div>
+
+    <!-- Floating Font Size Indicator -->
+    <div id="fontSizeIndicator" class="fixed bottom-6 right-6 z-[120] bg-stone-950/90 border border-amber-500/80 text-amber-400 font-mono font-bold text-xs px-3.5 py-2 rounded-full shadow-2xl transition duration-300 opacity-0 pointer-events-none flex items-center gap-1.5 backdrop-blur-md">
+      <span>🔤 Textgröße:</span>
+      <span id="fontSizeDisplay" class="font-black">23px</span>
     </div>
 
   </div>
@@ -2749,15 +2771,16 @@
 
     let fontSizeIndicatorTimer = null;
     function showFontSizeIndicator() {
-      const indicator = document.getElementById("scrollSpeedIndicator");
+      const indicator = document.getElementById("fontSizeIndicator");
+      const display = document.getElementById("fontSizeDisplay");
       if (!indicator) return;
 
-      indicator.innerHTML = `<span>🔤</span> <span>Textgröße: <strong>${baseFontSize}px</strong></span>`;
+      if (display) display.textContent = `${baseFontSize}px`;
       indicator.style.opacity = "1";
 
       if (fontSizeIndicatorTimer) clearTimeout(fontSizeIndicatorTimer);
       fontSizeIndicatorTimer = setTimeout(() => {
-        if (indicator && !isAutoScrolling) indicator.style.opacity = "0";
+        if (indicator) indicator.style.opacity = "0";
       }, 1400);
     }
 
@@ -2827,13 +2850,12 @@
       }, { passive: false });
     }
 
-    // ==================== AUTO-SCROLL MIT DYNAMISCHER GESCHWINDIGKEIT ====================
-    let autoScrollSpeed = 1.0; // Standard 1.0x (Skala 0.3x bis 4.0x)
+    // ==================== AUTO-SCROLL MIT HÄNDISCHEM TEMPO-WIDGET ====================
+    let autoScrollSpeed = 1.0; // Standard 1.0x (Skala 0.2x bis 4.0x)
     let autoScrollAnimId = null;
     let lastScrollTime = 0;
     let scrollSubPixelAcc = 0;
-    let speedIndicatorTimer = null;
-    let touchStartY = null;
+    let scrollSpeedWidgetTimer = null;
 
     function toggleAutoScroll() {
       if (isAutoScrolling) stopAutoScroll();
@@ -2856,7 +2878,7 @@
       lastScrollTime = performance.now();
       scrollSubPixelAcc = 0;
 
-      showScrollSpeedIndicator(`Auto-Scroll aktiv (${autoScrollSpeed.toFixed(1)}x)`);
+      showScrollSpeedWidget(true);
 
       function stepScroll(now) {
         if (!isAutoScrolling) return;
@@ -2900,70 +2922,68 @@
         icon.textContent = "⬇";
         if (btnText) btnText.textContent = "Scroll";
       }
+      hideScrollSpeedWidget();
     }
 
-    // Geschwindigkeit dynamisch variieren beim Wischen oder Scrollen
-    function adjustAutoScrollSpeed(delta) {
-      if (!isAutoScrolling) return;
-      const oldSpeed = autoScrollSpeed;
-      autoScrollSpeed = Math.max(0.3, Math.min(4.0, +(autoScrollSpeed + delta).toFixed(1)));
+    // Händische Anpassung durch den User über das Tempo-Widget
+    function adjustAutoScrollSpeedManual(delta) {
+      autoScrollSpeed = Math.max(0.2, Math.min(4.0, +(autoScrollSpeed + delta).toFixed(1)));
       
-      const btnText = document.getElementById("autoScrollBtnText");
-      if (btnText) btnText.textContent = `Scroll (${autoScrollSpeed.toFixed(1)}x)`;
+      const widgetValue = document.getElementById("scrollSpeedWidgetValue");
+      if (widgetValue) widgetValue.textContent = `${autoScrollSpeed.toFixed(1)}x`;
 
-      const directionText = autoScrollSpeed > oldSpeed ? "Schneller ⏩" : "Langsamer ⏪";
-      showScrollSpeedIndicator(`Tempo: ${autoScrollSpeed.toFixed(1)}x (${directionText})`);
+      const btnText = document.getElementById("autoScrollBtnText");
+      if (btnText && isAutoScrolling) btnText.textContent = `Scroll (${autoScrollSpeed.toFixed(1)}x)`;
+
+      showScrollSpeedWidget(true);
     }
 
-    function showScrollSpeedIndicator(text) {
-      const indicator = document.getElementById("scrollSpeedIndicator");
-      const display = document.getElementById("scrollSpeedDisplay");
-      if (!indicator) return;
+    function showScrollSpeedWidget(autoHide = true) {
+      const widget = document.getElementById("scrollSpeedWidget");
+      const widgetValue = document.getElementById("scrollSpeedWidgetValue");
+      if (!widget) return;
 
-      if (display) display.textContent = `${autoScrollSpeed.toFixed(1)}x`;
-      indicator.innerHTML = `<span>⚡</span> <span>${escapeHtml(text)}</span>`;
-      indicator.style.opacity = "1";
+      if (widgetValue) widgetValue.textContent = `${autoScrollSpeed.toFixed(1)}x`;
+      widget.style.opacity = "1";
+      widget.style.pointerEvents = "auto";
 
-      if (speedIndicatorTimer) clearTimeout(speedIndicatorTimer);
-      speedIndicatorTimer = setTimeout(() => {
-        if (indicator) indicator.style.opacity = "0";
-      }, 1600);
+      if (scrollSpeedWidgetTimer) clearTimeout(scrollSpeedWidgetTimer);
+      if (autoHide) {
+        scrollSpeedWidgetTimer = setTimeout(() => {
+          hideScrollSpeedWidget();
+        }, 3800);
+      }
+    }
+
+    function hideScrollSpeedWidget() {
+      const widget = document.getElementById("scrollSpeedWidget");
+      if (widget) {
+        widget.style.opacity = "0";
+        widget.style.pointerEvents = "none";
+      }
     }
 
     function initScrollSpeedGestureListeners() {
       const scrollArea = document.getElementById("modalScrollArea");
       if (!scrollArea) return;
 
-      // 1. Mausrad während Auto-Scroll variiert das Tempo
-      scrollArea.addEventListener("wheel", (e) => {
-        if (!isAutoScrolling) return;
-        // e.deltaY > 0 -> Runterscrollen (User will schneller sein)
-        // e.deltaY < 0 -> Hochscrollen (User will langsamer sein / zurück)
-        if (e.deltaY > 15) {
-          adjustAutoScrollSpeed(+0.2);
-        } else if (e.deltaY < -15) {
-          adjustAutoScrollSpeed(-0.2);
+      // Wenn der User per Hand nachscrollt oder wischt während Auto-Scroll aktiv ist:
+      // Tempo-Widget mit Schneller/Langsamer Buttons für händische Wahl anzeigen!
+      scrollArea.addEventListener("scroll", () => {
+        if (isAutoScrolling) {
+          showScrollSpeedWidget(true);
         }
       }, { passive: true });
 
-      // 2. Touch-Geste auf Smartphones/Tablets während Auto-Scroll
-      scrollArea.addEventListener("touchstart", (e) => {
-        if (!isAutoScrolling || e.touches.length === 0) return;
-        touchStartY = e.touches[0].clientY;
+      scrollArea.addEventListener("wheel", () => {
+        if (isAutoScrolling) {
+          showScrollSpeedWidget(true);
+        }
       }, { passive: true });
 
-      scrollArea.addEventListener("touchend", (e) => {
-        if (!isAutoScrolling || touchStartY === null || e.changedTouches.length === 0) return;
-        const touchEndY = e.changedTouches[0].clientY;
-        const diff = touchStartY - touchEndY;
-        touchStartY = null;
-
-        // Wisch nach oben (diff > 35) -> Seite scrollt nach unten -> Tempo erhöhen
-        // Wisch nach unten (diff < -35) -> Seite scrollt nach oben -> Tempo verringern
-        if (diff > 35) {
-          adjustAutoScrollSpeed(+0.25);
-        } else if (diff < -35) {
-          adjustAutoScrollSpeed(-0.25);
+      scrollArea.addEventListener("touchstart", () => {
+        if (isAutoScrolling) {
+          showScrollSpeedWidget(true);
         }
       }, { passive: true });
     }
