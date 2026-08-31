@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tribe Starter · We Space · Singkreis | Liederbuch & Chords</title>
+  <link rel="icon" type="image/jpeg" href="singkreis.jpg">
+  <link rel="apple-touch-icon" href="singkreis.jpg">
+
+  <!-- Google Fonts: Caprasimo (Headings) & Figtree (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDK für globale Echtzeit-Synchronisation -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* ==========================================================================
+       ORGANIC DESIGN SYSTEM TOKENS & BASE STYLES
+       ========================================================================== */
+    :root {
+      --ink: #100d0b;
+      --ink-2: #1c1612;
+      --ink-3: #261e18;
+      --ink-card: #201914;
+      --cream: #f9f2e7;
+      --cream-dim: rgba(249, 242, 231, 0.72);
+      --cream-muted: rgba(249, 242, 231, 0.45);
+      --cream-faint: rgba(249, 242, 231, 0.12);
+
+      --color-accent-100: #fff2eb;
+      --color-accent-200: #ffe1d0;
+      --color-accent-300: #ffc6a5;
+      --color-accent-400: #f6a06b;
+      --color-accent-500: #d67f48;
+      --color-accent-600: #b2622d;
+      --color-accent-700: #8c491a;
+      --color-accent-800: #643312;
+      --color-accent-900: #402310;
+
+      --color-accent-2-100: #f0fae1;
+      --color-accent-2-200: #e1eecc;
+      --color-accent-2-300: #ccdbb2;
+      --color-accent-2-400: #aebf92;
+      --color-accent-2-500: #8fa073;
+      --color-accent-2-600: #728157;
+      --color-accent-2-700: #56633f;
+
+      --font-heading: "Caprasimo", Georgia, serif;
+      --font-body: "Figtree", system-ui, -apple-system, sans-serif;
+      --font-chord: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
+      --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.6);
+      --shadow-glow: 0 0 35px rgba(214, 127, 72, 0.35);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--ink);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.5;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Scrollbar Styling */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      font-weight: 400;
+      letter-spacing: -0.015em;
+      line-height: 1.12;
+    }
+
+    a {
+      color: var(--color-accent-400);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    a:hover {
+      color: var(--color-accent-300);
+    }
+
+    button {
+      font-family: var(--font-body);
+      border: none;
+      outline: none;
+      background: transparent;
+      cursor: pointer;
+      color: inherit;
+    }
+
+    input, select {
+      font-family: var(--font-body);
+    }
+
+    /* Keyframes */
+    @keyframes emb {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 0.95; transform: scale(1.06); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(214,127,72,0.3), inset 0 0 10px rgba(214,127,72,0.15); }
+      50% { box-shadow: 0 0 30px rgba(214,127,72,0.65), inset 0 0 18px rgba(214,127,72,0.3); }
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(250%); }
+    }
+    @keyframes fadeScaleIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes riseUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .animate-emb { animation: emb 3.8s ease-in-out infinite; }
+    .animate-pulse-glow { animation: pulseGlow 2.2s infinite ease-in-out; }
+    .animate-shimmer { animation: shimmer 1.6s infinite linear; }
+    .animate-fade-in { animation: fadeIn 0.25s ease-out; }
+    .animate-scale-in { animation: fadeScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+    .animate-rise { animation: riseUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    .washed-img {
+      filter: saturate(0.75) contrast(0.9) brightness(1.05);
+    }
+
+    /* ==========================================================================
+       STAGE & LYRICS FORMATTING
+       ========================================================================== */
+    .stage-container {
+      background: #faf3e6;
+      color: #241d16;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+    .stage-container.stage-dark {
+      background: #100d0b;
+      color: var(--cream);
+    }
+
+    .section-badge {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #a19786;
+      padding: 22px 0 6px;
+      border-bottom: 1px solid rgba(36,29,22,0.12);
+      margin-bottom: 14px;
+      user-select: none;
+    }
+    .stage-dark .section-badge {
+      color: rgba(249, 242, 231, 0.4);
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .chord-line {
+      font-family: var(--font-chord);
+      font-weight: 700;
+      font-size: 0.72em;
+      letter-spacing: 0.03em;
+      color: #b2622d;
+      white-space: pre-wrap;
+      line-height: 1.25;
+      margin-bottom: 2px;
+      margin-top: 6px;
+      user-select: text;
+    }
+    .stage-dark .chord-line {
+      color: #ffc6a5;
+      text-shadow: 0 0 10px rgba(246, 160, 107, 0.2);
+    }
+
+    .lyric-line {
+      font-family: var(--font-body);
+      font-weight: 600;
+      color: inherit;
+      line-height: 1.36;
+      margin-bottom: 14px;
+      white-space: pre-wrap;
+      user-select: text;
+    }
+
+    /* Landscape Mode Tribe Starter Logo in Stage Header */
+    .stage-landscape-logo {
+      display: none;
+    }
+    @media (orientation: landscape), (min-width: 640px) {
+      .stage-landscape-logo {
+        display: block;
+      }
+    }
+
+    /* Range Slider Styling */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-accent-400);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      border: 2.5px solid #ffffff;
+      margin-top: -7px;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-accent-400);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      border: 2.5px solid #ffffff;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 10px;
+      border-radius: 9999px;
+    }
+    input[type="range"]::-moz-range-track {
+      height: 10px;
+      border-radius: 9999px;
+    }
+
+    /* Print styles */
+    @media print {
+      .no-print { display: none !important; }
+      body, .stage-container { background: white !important; color: black !important; }
+      #songModal { position: static !important; inset: auto !important; height: auto !important; }
+      .chord-line { color: #000 !important; }
+    }
+  </style>
+</head>
+<body class="no-scrollbar">
+
+  <!-- ==================== 1. SPLASH SCREEN ==================== -->
+  <div id="splashScreen" onclick="dismissSplashScreen()" style="position:fixed;inset:0;background:var(--ink);z-index:900;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;user-select:none;">
+    <div style="position:relative;margin-bottom:28px;display:flex;align-items:center;justify-content:center;">
+      <div class="animate-emb" style="position:absolute;inset:-18px;border-radius:var(--radius-xl);background:radial-gradient(circle, rgba(214,127,72,0.6), transparent 70%);filter:blur(22px);"></div>
+      <img src="singkreis.jpg" alt="Singkreis Logo" class="washed-img" style="position:relative;width:220px;height:220px;max-width:70vw;max-height:70vw;border-radius:var(--radius-xl);object-fit:cover;border:2px solid rgba(214,127,72,0.5);box-shadow:var(--shadow-lg);display:block;">
+    </div>
+    <h1 style="font-size:36px;color:var(--cream);letter-spacing:-0.02em;line-height:1.05;margin:0 0 10px;">Tribe Starter</h1>
+    <div style="font:600 11px/1 var(--font-body);letter-spacing:0.2em;text-transform:uppercase;color:var(--color-accent-400);">We Space · Singkreis</div>
+    <div style="margin-top:42px;font-size:12.5px;color:var(--cream-muted);display:flex;align-items:center;justify-content:center;gap:6px;">
+      <span>Tippen zum Öffnen</span>
+      <svg style="width:14px;height:14px;color:var(--color-accent-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+  </div>
+
+  <!-- ==================== 2. MAIN APP SHELL ==================== -->
+  <div id="appContainer" style="min-height:100vh;max-width:680px;margin:0 auto;display:flex;flex-direction:column;position:relative;padding-bottom:96px;">
+    
+    <!-- Sticky Top Section: Header, Search & Filter Chips -->
+    <div style="position:sticky;top:0;z-index:90;background:var(--ink);padding-top:env(safe-area-inset-top, 0px);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.05);box-shadow:0 8px 24px -6px rgba(0,0,0,0.5);">
+      <!-- Top Header (Centered Logo with nestled Inverted QR Code) -->
+      <header style="padding:14px 20px 10px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        
+        <!-- Tribe Starter Logo (Fullscreen toggle) -->
+        <div style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;max-width:280px;transition:transform 0.15s ease;" onclick="toggleFullscreen()" title="Tippen für Vollbild an/aus">
+          <img src="tribe-starter-logo.png" alt="Tribe Starter Logo" style="width:100%;max-width:260px;height:auto;max-height:58px;object-fit:contain;display:block;filter:drop-shadow(0 2px 10px rgba(0,0,0,0.45));">
+        </div>
+
+        <!-- Inverted QR Code nestled on the right (Opens Viewport-Filling Lightbox) -->
+        <div onclick="openQrLightbox()" style="cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;background:var(--ink-card);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-md);flex:none;box-shadow:var(--shadow-sm);transition:all 0.15s ease;margin-left:2px;" title="QR-Code groß anzeigen">
+          <img src="qr.png" alt="QR-Code" style="width:34px;height:34px;display:block;filter:invert(1);border-radius:3px;">
+        </div>
+
+      </header>
+
+      <!-- Search Input Bar -->
+      <div style="padding:0 20px 12px;">
+        <div style="display:flex;align-items:center;gap:11px;background:var(--ink-card);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-full);padding:11px 18px;box-shadow:var(--shadow-sm);">
+          <svg style="width:18px;height:18px;color:var(--color-accent-500);flex:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Lied, Interpret, Textzeile…" 
+            oninput="handleSearch(this.value)"
+            style="flex:1;min-width:0;background:transparent;border:0;outline:none;font-size:15px;color:var(--cream);font-weight:500;"
+          >
+          <button id="clearSearchBtn" onclick="clearSearch()" style="display:none;width:22px;height:22px;border-radius:var(--radius-full);background:rgba(255,255,255,0.1);color:var(--cream-dim);align-items:center;justify-content:center;cursor:pointer;">
+            <svg style="width:12px;height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Chips Row -->
+      <div class="no-scrollbar" style="padding:0 20px 14px;display:flex;gap:8px;overflow-x:auto;">
+        <button onclick="setFilter('all')" id="chip-all" style="padding:8px 16px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font-weight:700;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
+          <span>Alle</span>
+          <span id="count-all" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">122</span>
+        </button>
+
+        <button onclick="setFilter('fav')" id="chip-fav" style="padding:8px 14px;border-radius:var(--radius-full);background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--cream-dim);font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;" title="Favoriten">
+          <svg style="width:14px;height:14px;color:var(--color-accent-400);" viewBox="0 0 24 24" fill="currentColor"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <span id="count-fav" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">0</span>
+        </button>
+
+        <button onclick="setFilter('community')" id="chip-community" style="padding:8px 16px;border-radius:var(--radius-full);background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--cream-dim);font-weight:600;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
+          <span>Aus dem Kreis</span>
+          <span id="count-community" style="font-family:var(--font-chord);font-size:11.5px;opacity:0.85;">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Song List Header & Sort -->
+    <div style="padding:14px 22px 10px;display:flex;align-items:center;justify-content:space-between;font-size:11.5px;">
+      <div id="listSectionTitle" style="font:700 10px/1 var(--font-body);letter-spacing:0.16em;text-transform:uppercase;color:var(--cream-muted);">
+        Zuletzt gesungen
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;color:var(--cream-muted);">
+        <span>Sortierung:</span>
+        <select id="sortSelect" onchange="renderSongList()" style="background:var(--ink-card);color:var(--cream);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-sm);padding:3px 8px;font-size:11px;outline:none;">
+          <option value="popularity" selected>Popularität</option>
+          <option value="title">Titel (A-Z)</option>
+          <option value="artist">Interpret</option>
+          <option value="year_desc">Jahr (Neueste zuerst)</option>
+          <option value="year_asc">Jahr (Älteste zuerst)</option>
+          <option value="tempo">Tempo (BPM)</option>
+          <option value="community">Aus dem Kreis</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Songs List Container -->
+    <div id="songsListContainer" style="padding:0 16px;display:flex;flex-direction:column;gap:8px;">
+      <!-- Dynamisch gerendert -->
+    </div>
+
+    <!-- Empty Search State -->
+    <div id="emptyResultsBox" style="display:none;margin:20px 16px 0;padding:32px 20px;border-radius:var(--radius-lg);background:var(--ink-card);text-align:center;border:1px solid rgba(255,255,255,0.06);">
+      <div style="font-family:var(--font-heading);font-size:20px;color:var(--cream);margin-bottom:8px;">Noch nicht im Repertoire</div>
+      <p id="emptyResultsSub" style="font-size:13.5px;line-height:1.55;color:var(--cream-dim);margin:0 0 20px;">
+        Diesen Song finden wir für dich — mit vollständigem Text und passenden Gitarrenakkorden.
+      </p>
+      <button onclick="openAiSheetFromSearch()" style="display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font-weight:700;font-size:14px;box-shadow:var(--shadow-md);transition:transform 0.15s ease;">
+        <svg style="width:17px;height:17px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path></svg>
+        <span>Mit AI recherchieren</span>
+      </button>
+    </div>
+
+    <!-- Mantren & Heilsame Lieder Card at bottom of song list -->
+    <div style="padding:0 16px;margin-top:14px;">
+      <div onclick="openMantrasSheet()" style="background:linear-gradient(135deg, rgba(174,191,146,0.12), rgba(174,191,146,0.04));border:1px solid rgba(174,191,146,0.28);border-radius:var(--radius-xl);padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform 0.15s ease;box-shadow:var(--shadow-sm);" title="673 Mantren & heilsame Lieder">
+        <div style="width:44px;height:44px;border-radius:var(--radius-full);background:rgba(174,191,146,0.18);color:var(--color-accent-2-300);display:flex;align-items:center;justify-content:center;flex:none;">
+          <svg style="width:22px;height:22px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-family:var(--font-heading);font-size:17px;color:var(--cream);line-height:1.2;">Mantren & heilsame Lieder</span>
+            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:var(--radius-full);background:rgba(174,191,146,0.2);color:var(--color-accent-2-300);font-family:var(--font-chord);">673</span>
+          </div>
+          <p style="font-size:12px;color:var(--cream-dim);margin:3px 0 0;line-height:1.4;">
+            Gayatri, Kirtan, Herzenslieder & traditionelle Chants
+          </p>
+        </div>
+        <svg style="width:18px;height:18px;color:var(--color-accent-2-300);flex:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+    </div>
+
+    <!-- Community & Kreis-Sync Footer Info -->
+    <div style="margin:24px 16px 10px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <svg style="width:16px;height:16px;color:var(--color-accent-2-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+        <span id="communityFooterText" style="font-size:12.5px;font-weight:600;color:var(--cream-dim);">Aus dem Kreis · 0 Lieder</span>
+      </div>
+      <button onclick="openCloudSheet()" id="cloudPillBtn" style="display:flex;align-items:center;gap:7px;padding:6px 13px;border-radius:var(--radius-full);background:rgba(255,255,255,0.07);color:var(--cream-dim);font:700 11px/1 var(--font-body);cursor:pointer;border:1px solid rgba(255,255,255,0.08);">
+        <span id="cloudStatusDot" style="width:6px;height:6px;border-radius:var(--radius-full);background:var(--color-accent-500);display:block;"></span>
+        <span id="cloudStatusLabel">Sync einrichten</span>
+      </button>
+    </div>
+
+    <!-- Inverted QR Code Section (White Code on Black Background) -->
+    <div style="margin:18px auto 4px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div onclick="openQrLightbox()" style="cursor:pointer;display:inline-block;padding:12px;background:var(--ink-card);border:1px solid rgba(255,255,255,0.09);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);transition:transform 0.15s ease;" title="QR-Code groß anzeigen">
+        <img src="qr.png" alt="Singkreis App QR-Code" style="width:116px;height:116px;display:block;filter:invert(1);border-radius:var(--radius-sm);">
+      </div>
+      <div style="font-size:11px;color:var(--cream-dim);margin-top:7px;font-weight:600;letter-spacing:0.04em;">
+        App scannen & teilen
+      </div>
+    </div>
+
+    <!-- Website & Open Source Link -->
+    <footer style="margin-top:16px;text-align:center;font-size:11.5px;color:var(--cream-muted);padding-bottom:14px;line-height:1.7;">
+      <div>
+        <a href="https://www.tribestarter.org" target="_blank" rel="noopener noreferrer" style="font-weight:700;color:var(--color-accent-400);">www.tribestarter.org ↗</a>
+        <span style="margin:0 6px;">·</span>
+        <a href="https://github.com/enzocage/singkreis-tribe-starter-we-space" target="_blank" rel="noopener noreferrer" style="color:var(--cream-dim);text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;gap:4px;">
+          <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+      <div style="font-size:11px;color:var(--cream-dim);opacity:0.85;margin-top:2px;">
+        Diese App ist Open Source
+      </div>
+    </footer>
+
+    <!-- Fixed Floating Bottom Action Bar (Home) -->
+    <div style="position:fixed;bottom:0;left:0;right:0;max-width:680px;margin:0 auto;padding:10px 20px 24px;display:flex;align-items:center;justify-content:center;background:linear-gradient(to top, var(--ink) 72%, transparent);z-index:40;pointer-events:none;">
+      <button onclick="openAiSheet()" style="pointer-events:auto;width:100%;max-width:420px;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font:700 15px/1 var(--font-body);box-shadow:var(--shadow-lg);transition:transform 0.15s ease;cursor:pointer;">
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path></svg>
+        <span>Song dazuholen</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ==================== 3. STAGE / NOTENSTÄNDER FULLSCREEN ==================== -->
+  <div id="songModal" class="stage-container no-scrollbar" style="display:none;position:fixed;inset:0;z-index:100;flex-direction:column;overflow:hidden;touch-action:pan-y;">
+    
+    <!-- Real-time HUD Zoom Indicator Pill -->
+    <div id="stageZoomHud" style="display:none;position:fixed;top:76px;left:50%;transform:translateX(-50%);padding:7px 18px;border-radius:var(--radius-full);background:rgba(26,20,17,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(214,127,72,0.5);color:var(--cream);font:700 13.5px/1 var(--font-chord);box-shadow:0 8px 24px rgba(0,0,0,0.5);z-index:200;pointer-events:none;transition:opacity 0.2s ease;">
+      🔍 <span id="stageZoomHudVal">23</span> px
+    </div>
+
+    <!-- Stage Header (Warm Black Bar - Sticky) -->
+    <div style="position:sticky;top:0;z-index:50;background:var(--ink);padding:max(16px, env(safe-area-inset-top, 16px)) 16px 12px;display:flex;align-items:center;gap:12px;flex:none;box-shadow:0 4px 18px rgba(0,0,0,0.35);border-bottom:1px solid rgba(255,255,255,0.06);">
+      <button onclick="closeSongModal()" style="width:38px;height:38px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--cream);display:flex;align-items:center;justify-content:center;flex:none;" title="Zurück zur Übersicht">
+        <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+
+      <div style="min-width:0;flex:1;cursor:pointer;display:flex;align-items:center;gap:14px;" onclick="toggleFullscreen()" title="Tippen für Vollbild an/aus">
+        <div style="min-width:0;flex:1;">
+          <h2 id="stageSongTitle" style="font-size:19px;color:var(--cream);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Songtitel</h2>
+          <div id="stageSongMeta" style="font-size:11.5px;color:var(--color-accent-400);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">Interpret · Jahr · BPM</div>
+        </div>
+
+        <!-- Tribe Starter Logo in Landscape / Horizontal Mode -->
+        <div class="stage-landscape-logo" style="flex:none;">
+          <img src="tribe-starter-logo.png" alt="Tribe Starter Logo" style="height:34px;width:auto;max-width:145px;object-fit:contain;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));opacity:0.92;">
+        </div>
+      </div>
+
+      <!-- Stage Favorite Heart -->
+      <button id="stageFavBtn" onclick="toggleActiveSongFavorite()" style="width:38px;height:38px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--cream-dim);display:flex;align-items:center;justify-content:center;flex:none;" title="Favorit">
+        <svg id="stageFavIcon" style="width:19px;height:19px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+      </button>
+
+      <!-- YouTube Button -->
+      <a id="stageYoutubeBtn" href="#" target="_blank" rel="noopener noreferrer" style="width:38px;height:38px;border-radius:var(--radius-full);background:rgba(255,0,0,0.14);border:1px solid rgba(255,0,0,0.25);display:flex;align-items:center;justify-content:center;flex:none;transition:transform 0.15s ease;" title="Auf YouTube anhören">
+        <svg style="width:21px;height:21px;" viewBox="0 0 24 24" fill="none">
+          <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" fill="#FF0000"/>
+          <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#FFFFFF"/>
+        </svg>
+      </a>
+
+      <!-- Stage Light/Dark Toggle -->
+      <button onclick="toggleStageDarkMode()" style="width:38px;height:38px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--color-accent-400);display:flex;align-items:center;justify-content:center;flex:none;" title="Dunkelmodus Notenständer">
+        <svg id="stageDarkIcon" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+      </button>
+    </div>
+
+    <!-- Stage Scrollable Lyrics Content Area -->
+    <div id="stageScrollArea" class="no-scrollbar" ondblclick="toggleAutoScroll()" style="flex:1;overflow-y:auto;padding:20px 20px 170px;max-width:760px;width:100%;margin:0 auto;cursor:pointer;">
+      
+      <!-- Core Theme / Message Pill -->
+      <div id="stageMessagePill" style="display:inline-flex;align-items:flex-start;gap:9px;background:rgba(214,127,72,0.14);color:#8c491a;border-radius:var(--radius-lg);padding:10px 16px;font-size:13px;line-height:1.5;font-weight:600;margin-bottom:20px;max-width:100%;">
+        <svg style="width:15px;height:15px;flex:none;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+        <span id="stageMessageText">Kernaussage des Liedes</span>
+      </div>
+
+      <!-- Main Lyrics Body -->
+      <div id="stageLyricsBody" style="font-size:23px;line-height:1.36;font-weight:600;user-select:text;">
+        <!-- Dynamischer Inhalt -->
+      </div>
+
+      <!-- Played Chords Badges at bottom -->
+      <div style="margin-top:34px;padding-top:16px;border-top:1px solid rgba(36,29,22,0.12);" id="stageChordsFooter">
+        <div style="font:600 10px/1 var(--font-body);letter-spacing:0.18em;text-transform:uppercase;color:#a19786;margin-bottom:12px;">Gespielte Akkorde</div>
+        <div id="stageChordsBadges" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      </div>
+    </div>
+
+    <!-- ==================== FLOATING STAGE CONTROL BAR ==================== -->
+    <div id="stageControlsWrapper" style="position:fixed;left:12px;right:12px;bottom:18px;max-width:620px;margin:0 auto;z-index:110;pointer-events:none;transition:opacity 0.5s cubic-bezier(0.2, 0, 0.2, 1);opacity:1;">
+      
+      <!-- Expanded Tools Drawer (Opens above main bar) -->
+      <div id="stageToolsDrawer" style="display:none;background:rgba(26,20,17,0.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:var(--radius-lg);padding:16px;margin-bottom:9px;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,0.09);pointer-events:auto;" class="animate-scale-in">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font:700 10.5px/1 var(--font-body);letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-muted);">
+            Textgröße · <span id="toolsFontSizeDisplay">23</span> px
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="adjustFontSize(-2)" style="width:38px;height:38px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--color-accent-400);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">A−</button>
+            <button onclick="adjustFontSize(2)" style="width:38px;height:38px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--color-accent-400);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">A+</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="toggleChordsBtn" onclick="toggleChords()" style="padding:10px 16px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--cream-dim);font-weight:600;font-size:13px;">
+            Akkorde aus
+          </button>
+          <button id="bpmTockBtn" onclick="playBpmTock()" style="padding:10px 16px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--cream-dim);font-weight:600;font-size:13px;display:flex;align-items:center;gap:7px;transition:all 0.15s ease;" title="Tempo akustisch vorzählen (5x Tock)">
+            <svg style="width:14px;height:14px;color:var(--color-accent-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span id="bpmTockText">80 BPM Tock</span>
+          </button>
+          <button onclick="openWakeLockModal()" style="padding:10px 16px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--cream-dim);font-weight:600;font-size:13px;display:flex;align-items:center;gap:7px;">
+            <svg style="width:14px;height:14px;color:var(--color-accent-2-300);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+            <span>Display bleibt an</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Consolidated Floating Pill (Full-Width Slider on Top, Controls Below) -->
+      <div style="background:rgba(26,20,17,0.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:var(--radius-xl);padding:14px 16px 12px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,0.09);pointer-events:auto;">
+        
+        <!-- 1. Full-Width Speed Slider (Above the controls row) -->
+        <div style="width:100%;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span id="stageScrollLabel" style="font:700 10.5px/1 var(--font-body);letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-muted);display:flex;align-items:center;gap:6px;">
+              <svg style="width:13px;height:13px;color:var(--color-accent-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+              Auto-Scroll Geschwindigkeit
+            </span>
+            <span id="stageSpeedValue" style="font:700 12.5px/1 var(--font-chord);color:var(--color-accent-400);background:rgba(214,127,72,0.18);padding:3px 9px;border-radius:var(--radius-full);">1.0×</span>
+          </div>
+          <div style="width:100%;padding:4px 0;">
+            <input 
+              type="range" 
+              id="scrollSpeedRange" 
+              min="0.2" 
+              max="4.0" 
+              step="0.1" 
+              value="1.0" 
+              oninput="handleSpeedChange(this.value)"
+              style="width:100%;height:10px;-webkit-appearance:none;appearance:none;border-radius:var(--radius-full);background:linear-gradient(90deg, var(--color-accent-500) 25%, rgba(255,255,255,0.16) 25%);outline:none;cursor:pointer;display:block;"
+            >
+          </div>
+        </div>
+
+        <!-- 2. Controls Action Row -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);">
+          
+          <!-- Auto-Scroll Play/Pause Button with Label -->
+          <button id="stageScrollPlayBtn" onclick="toggleAutoScroll()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font:700 13.5px/1 var(--font-body);box-shadow:var(--shadow-sm);transition:all 0.15s ease;cursor:pointer;">
+            <svg id="stageScrollPlayIcon" style="width:16px;height:16px;" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+            <svg id="stageScrollPauseIcon" style="display:none;width:16px;height:16px;" viewBox="0 0 24 24" fill="currentColor"><rect x="14" y="4" width="4" height="16" rx="1"></rect><rect x="6" y="4" width="4" height="16" rx="1"></rect></svg>
+            <span id="stageScrollBtnText">Scrollen</span>
+          </button>
+
+          <!-- Tonart Transposition (− / Key / +) -->
+          <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,0.08);border-radius:var(--radius-full);padding:3px 6px;flex:none;">
+            <button onclick="transposeSong(-1)" style="width:32px;height:32px;border-radius:var(--radius-full);color:var(--color-accent-400);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;" title="Halbton tiefer">−</button>
+            <span id="stageCurrentKeyDisplay" style="font:700 15px/1 var(--font-chord);color:var(--cream);min-width:32px;text-align:center;">C</span>
+            <button onclick="transposeSong(1)" style="width:32px;height:32px;border-radius:var(--radius-full);color:var(--color-accent-400);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;" title="Halbton höher">+</button>
+          </div>
+
+          <!-- Tools Drawer Toggle -->
+          <button id="stageToolsToggleBtn" onclick="toggleStageTools()" style="width:38px;height:38px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--cream-dim);display:flex;align-items:center;justify-content:center;flex:none;" title="Werkzeuge & Einstellungen">
+            <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"></path></svg>
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 4. BOTTOM SHEET: MANTREN & HEILSAME LIEDER ==================== -->
+  <div id="mantrasSheet" style="display:none;position:fixed;inset:0;background:rgba(16,13,11,0.72);z-index:200;flex-direction:column;justify-content:flex-end;">
+    <div onclick="closeMantrasSheet()" style="flex:1;cursor:pointer;"></div>
+    <div class="animate-rise" style="height:84%;max-height:860px;background:var(--ink-2);border-radius:34px 34px 0 0;display:flex;flex-direction:column;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow-lg);">
+      
+      <!-- Handle -->
+      <div style="padding:12px 0 0;flex:none;"><div onclick="closeMantrasSheet()" style="width:44px;height:5px;border-radius:var(--radius-full);background:rgba(255,255,255,0.2);margin:0 auto;cursor:pointer;"></div></div>
+
+      <!-- Header & Search -->
+      <div style="padding:16px 20px 12px;flex:none;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:42px;height:42px;border-radius:var(--radius-full);background:rgba(174,191,146,0.16);color:var(--color-accent-2-300);display:flex;align-items:center;justify-content:center;flex:none;">
+            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <h3 style="font-size:20px;color:var(--cream);line-height:1.1;">Mantren & heilsame Lieder</h3>
+            <div id="mantrasSubtitle" style="font-size:12px;color:var(--cream-muted);margin-top:2px;">673 Lieder · Tippen startet die Songsuche</div>
+          </div>
+          <button onclick="pickRandomMantra()" style="width:38px;height:38px;border-radius:var(--radius-full);background:rgba(174,191,146,0.14);color:var(--color-accent-2-300);display:flex;align-items:center;justify-content:center;flex:none;" title="Zufälliges Mantra wählen">
+            <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="m18 14 4 4-4 4M2 18h20M6 10 2 6l4-4M22 6H2"></path></svg>
+          </button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;background:var(--ink);border-radius:var(--radius-full);padding:11px 16px;border:1px solid rgba(255,255,255,0.06);">
+          <svg style="width:17px;height:17px;color:var(--color-accent-2-300);flex:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <input 
+            type="text" 
+            id="mantraSearchInput" 
+            placeholder="Gayatri, Krishna Das, Angels, Herzenslied…" 
+            oninput="handleMantraSearch(this.value)"
+            style="flex:1;min-width:0;background:transparent;border:0;outline:none;font-size:14.5px;color:var(--cream);"
+          >
+        </div>
+      </div>
+
+      <!-- Mantras Scrollable List -->
+      <div id="mantrasListContainer" class="no-scrollbar" style="flex:1;overflow-y:auto;padding:0 16px;display:flex;flex-direction:column;gap:7px;">
+        <!-- Dynamisch gerendert -->
+      </div>
+
+      <!-- Trance & Suggestion Disclaimer -->
+      <div style="padding:14px 20px 24px;flex:none;font-size:11.5px;line-height:1.55;color:var(--cream-muted);display:flex;gap:10px;align-items:flex-start;border-top:1px solid rgba(255,255,255,0.06);background:var(--ink-2);">
+        <svg style="width:16px;height:16px;color:var(--color-accent-2-300);flex:none;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+        <span>Das rhythmische Wiederholen von Mantren und Texten wirkt über kognitive und suggestive Mechanismen direkt auf das Unterbewusstsein. Bei regelmäßiger und intensiver Anwendung können sich sprachliche Muster, Glaubenssätze und emotionale Zustände tief im Denken verankern. Achte daher auf einen eigenverantwortlichen und reflektierten Umgang.</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 5. BOTTOM SHEET: AI SONG GENERATION ==================== -->
+  <div id="aiSheet" style="display:none;position:fixed;inset:0;background:rgba(16,13,11,0.72);z-index:200;flex-direction:column;justify-content:flex-end;">
+    <div onclick="closeAiSheet()" style="flex:1;cursor:pointer;"></div>
+    <div class="animate-rise" style="background:var(--ink-2);border-radius:34px 34px 0 0;padding:12px 0 28px;max-height:88%;display:flex;flex-direction:column;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow-lg);">
+      
+      <!-- Handle -->
+      <div onclick="closeAiSheet()" style="width:44px;height:5px;border-radius:var(--radius-full);background:rgba(255,255,255,0.2);margin:0 auto 16px;cursor:pointer;flex:none;"></div>
+
+      <div style="padding:0 20px;flex:none;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:42px;height:42px;border-radius:var(--radius-full);background:rgba(214,127,72,0.18);color:var(--color-accent-400);display:flex;align-items:center;justify-content:center;flex:none;">
+            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <h3 style="font-size:20px;color:var(--cream);line-height:1.1;">Song dazuholen</h3>
+            <div style="font-size:12px;color:var(--cream-muted);margin-top:2px;">Titel oder Interpret — wir suchen Text & Akkorde</div>
+          </div>
+        </div>
+
+        <!-- Search input -->
+        <div style="display:flex;align-items:center;gap:10px;background:var(--ink);border-radius:var(--radius-full);padding:13px 18px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.06);">
+          <input 
+            type="text" 
+            id="aiSongSearchInput" 
+            placeholder="z.B. Knockin' on Heaven's Door, Oasis, Reinhard Mey…" 
+            onkeydown="if(event.key==='Enter') handleFindSingleSong()"
+            style="flex:1;min-width:0;background:transparent;border:0;outline:none;font-size:15px;color:var(--cream);"
+          >
+        </div>
+
+        <!-- API Key & Action Buttons -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
+          <button onclick="toggleApiKeyAccordion()" style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--cream-muted);">
+            <svg style="width:14px;height:14px;color:var(--color-accent-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"></path><circle cx="9" cy="15" r="6"></circle><path d="m12.5 11.5 6-6"></path></svg>
+            <span id="apiKeyStatusLabel">API Key eingeben</span>
+          </button>
+          
+          <button id="aiFindSongBtn" onclick="handleFindSingleSong()" style="padding:13px 22px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font:700 14px/1 var(--font-body);box-shadow:var(--shadow-md);">
+            <span>Song finden</span>
+          </button>
+        </div>
+
+        <!-- API Key Accordion -->
+        <div id="apiKeyAccordion" style="display:none;padding:14px 16px;border-radius:var(--radius-lg);background:var(--ink);margin-bottom:14px;border:1px solid rgba(255,255,255,0.06);">
+          <div style="font:700 10px/1 var(--font-body);letter-spacing:0.12em;text-transform:uppercase;color:var(--cream-muted);margin-bottom:8px;">Google Gemini API Key</div>
+          <input 
+            type="password" 
+            id="geminiApiKeyInput" 
+            placeholder="•••••••••••• (wird sicher im Browser gespeichert)" 
+            oninput="saveGeminiApiKey(this.value)"
+            style="width:100%;background:rgba(255,255,255,0.06);border:0;outline:none;border-radius:var(--radius-full);padding:10px 16px;font-family:var(--font-chord);font-size:12.5px;color:var(--cream);margin-bottom:8px;"
+          >
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:11.5px;">
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="font-weight:700;">Gratis API Key erstellen ↗</a>
+            <span style="color:var(--cream-muted);">Free Tier reicht völlig aus</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- AI Status, Progress & Results -->
+      <div id="aiScrollArea" class="no-scrollbar" style="flex:1;overflow-y:auto;padding:0 20px;">
+        
+        <!-- Animated Progress Box -->
+        <div id="aiProgressBox" style="display:none;padding:16px;border-radius:var(--radius-lg);background:var(--ink);margin-bottom:14px;border:1px solid rgba(214,127,72,0.4);" class="animate-pulse-glow">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;">
+            <div style="min-width:0;">
+              <div id="aiProgressTitle" style="font-size:13.5px;font-weight:700;color:var(--cream);">Recherchiere Titel & Interpret…</div>
+              <div id="aiProgressSub" style="font-size:11.5px;color:var(--color-accent-400);font-weight:600;margin-top:2px;">Gemini Flash analysiert…</div>
+            </div>
+            <span id="aiProgressPercent" style="font:700 13px/1 var(--font-chord);color:var(--color-accent-400);flex:none;">10%</span>
+          </div>
+          <div style="height:7px;border-radius:var(--radius-full);background:rgba(255,255,255,0.1);overflow:hidden;position:relative;">
+            <div id="aiProgressBarFill" style="height:100%;border-radius:var(--radius-full);background:linear-gradient(90deg, var(--color-accent-500), var(--color-accent-300));width:10%;transition:width 0.25s ease;">
+              <div class="animate-shimmer" style="position:absolute;inset:0;width:50%;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Results Section -->
+        <div id="aiResultsWrapper" style="display:none;">
+          <div id="aiResultsHeaderTitle" style="font:600 10px/1 var(--font-body);letter-spacing:0.16em;text-transform:uppercase;color:var(--cream-muted);margin-bottom:12px;">
+            Gefunden · tippen zum Generieren
+          </div>
+          <div id="aiResultsList" style="display:flex;flex-direction:column;gap:8px;padding-bottom:14px;">
+            <!-- Dynamisch gerendert -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 6. BOTTOM SHEET: CLOUD SYNC (FIREBASE) ==================== -->
+  <div id="cloudSheet" style="display:none;position:fixed;inset:0;background:rgba(16,13,11,0.72);z-index:200;flex-direction:column;justify-content:flex-end;">
+    <div onclick="closeCloudSheet()" style="flex:1;cursor:pointer;"></div>
+    <div class="animate-rise" style="background:var(--ink-2);border-radius:34px 34px 0 0;padding:12px 20px 28px;border-top:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow-lg);">
+      
+      <div onclick="closeCloudSheet()" style="width:44px;height:5px;border-radius:var(--radius-full);background:rgba(255,255,255,0.2);margin:0 auto 16px;cursor:pointer;"></div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:42px;height:42px;border-radius:var(--radius-full);background:rgba(174,191,146,0.16);color:var(--color-accent-2-300);display:flex;align-items:center;justify-content:center;flex:none;">
+          <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <h3 style="font-size:20px;color:var(--cream);line-height:1.1;">Kreis-Sync</h3>
+          <div style="font-size:12px;color:var(--cream-muted);margin-top:2px;">Neue Lieder erscheinen sofort auf allen Geräten</div>
+        </div>
+      </div>
+
+      <div style="padding:12px 16px;border-radius:var(--radius-lg);background:var(--ink);display:flex;align-items:center;gap:11px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);">
+        <span id="cloudModalDot" style="width:10px;height:10px;border-radius:var(--radius-full);background:var(--cream-muted);flex:none;"></span>
+        <span id="cloudModalStatusText" style="font-size:13px;font-weight:600;color:var(--cream);">Offline · lokal gespeichert</span>
+      </div>
+
+      <div style="font:700 10px/1 var(--font-body);letter-spacing:0.12em;text-transform:uppercase;color:var(--cream-muted);margin-bottom:6px;">Firebase Project ID</div>
+      <input 
+        type="text" 
+        id="fbProjectIdInput" 
+        placeholder="mein-singkreis" 
+        style="width:100%;background:var(--ink);border:1px solid rgba(255,255,255,0.06);outline:none;border-radius:var(--radius-full);padding:12px 16px;font-size:13.5px;color:var(--cream);margin-bottom:12px;"
+      >
+
+      <div style="font:700 10px/1 var(--font-body);letter-spacing:0.12em;text-transform:uppercase;color:var(--cream-muted);margin-bottom:6px;">Firebase Web API Key</div>
+      <input 
+        type="password" 
+        id="fbApiKeyInput" 
+        placeholder="AIzaSy…" 
+        style="width:100%;background:var(--ink);border:1px solid rgba(255,255,255,0.06);outline:none;border-radius:var(--radius-full);padding:12px 16px;font-family:var(--font-chord);font-size:13px;color:var(--cream);margin-bottom:18px;"
+      >
+
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="testFirebaseConnection()" style="flex:1;text-align:center;padding:14px;border-radius:var(--radius-full);background:rgba(255,255,255,0.07);color:var(--color-accent-2-300);font-weight:700;font-size:13.5px;">
+          Verbindung testen
+        </button>
+        <button onclick="saveFirebaseConfig()" style="flex:1;text-align:center;padding:14px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font-weight:700;font-size:13.5px;box-shadow:var(--shadow-md);">
+          Speichern
+        </button>
+      </div>
+
+      <div style="margin-top:14px;font-size:11.5px;line-height:1.55;color:var(--cream-muted);">
+        Ohne Konfiguration bleiben deine Lieder sicher auf diesem Gerät gespeichert.
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 7. LIGHTBOX & FULLSCREEN QR ==================== -->
+  <div id="imageLightbox" onclick="closeImageLightbox()" style="display:none;position:fixed;inset:0;background:rgba(16,13,11,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+    <div onclick="event.stopPropagation()" class="animate-scale-in" style="max-width:380px;width:100%;text-align:center;background:var(--ink-2);padding:24px;border-radius:var(--radius-xl);border:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow-lg);">
+      <img src="singkreis.jpg" alt="Singkreis Großansicht" class="washed-img" style="width:180px;height:180px;border-radius:var(--radius-xl);object-fit:cover;margin:0 auto 16px;border:2px solid rgba(214,127,72,0.5);display:block;">
+      <h3 style="font-size:22px;color:var(--cream);margin-bottom:4px;">Tribe Starter</h3>
+      <div style="font:600 10.5px/1 var(--font-body);letter-spacing:0.18em;text-transform:uppercase;color:var(--color-accent-400);margin-bottom:18px;">We Space · Singkreis</div>
+      
+      <!-- QR Code -->
+      <div onclick="openQrFullscreen()" style="background:#ffffff;padding:12px;border-radius:var(--radius-md);display:inline-block;cursor:pointer;margin-bottom:14px;box-shadow:var(--shadow-md);" title="Tippen für Vollbild-QR">
+        <img src="qr.png" alt="QR-Code" style="width:140px;height:140px;object-fit:contain;display:block;">
+        <span style="font-size:10px;font-weight:800;color:#100d0b;text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;display:block;">📱 QR-Code Vollbild</span>
+      </div>
+
+      <div>
+        <button onclick="closeImageLightbox()" style="padding:8px 20px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--cream-dim);font-size:12px;font-weight:600;">
+          ✕ Schließen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Fullscreen / Lightbox Modal (Inverted on Black, Viewport-Filling) -->
+  <div id="qrFullscreenModal" onclick="closeQrLightbox()" style="display:none;position:fixed;inset:0;background:rgba(10,8,7,0.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:350;flex-direction:column;align-items:center;justify-content:center;padding:20px;">
+    
+    <!-- Close Button Top Right -->
+    <button onclick="closeQrLightbox()" style="position:absolute;top:20px;right:20px;width:44px;height:44px;border-radius:var(--radius-full);background:rgba(255,255,255,0.12);color:var(--cream);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.15);cursor:pointer;z-index:360;" title="Schließen">
+      <svg style="width:22px;height:22px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+    </button>
+
+    <div onclick="event.stopPropagation()" class="animate-scale-in" style="max-width:92vw;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+      <div style="background:#000000;padding:24px;border-radius:var(--radius-2xl);display:inline-block;box-shadow:0 24px 60px rgba(0,0,0,0.85);border:2px solid rgba(255,255,255,0.18);margin-bottom:16px;">
+        <img src="qr.png" alt="QR-Code Großansicht" style="width:78vw;max-width:440px;height:auto;aspect-ratio:1/1;object-fit:contain;display:block;filter:invert(1);border-radius:var(--radius-sm);">
+        <div style="font-family:var(--font-heading);font-size:22px;color:var(--cream);margin-top:16px;line-height:1.2;">Tribe Starter Liederbuch</div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--color-accent-400);text-transform:uppercase;letter-spacing:0.12em;margin-top:6px;">Liederbuch scannen & mitsingen</div>
+      </div>
+      <button onclick="closeQrLightbox()" style="padding:11px 26px;border-radius:var(--radius-full);background:rgba(255,255,255,0.12);color:var(--cream);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,0.15);">
+        ✕ Antippen zum Schließen
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== 8. SCREEN WAKE-LOCK & TIMEOUT TIP MODAL ==================== -->
+  <div id="wakeLockModal" onclick="closeWakeLockModal()" style="display:none;position:fixed;inset:0;background:rgba(16,13,11,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:300;align-items:center;justify-content:center;padding:20px;">
+    <div onclick="event.stopPropagation()" class="animate-scale-in" style="max-width:440px;width:100%;background:var(--ink-2);padding:24px;border-radius:var(--radius-xl);border:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow-lg);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:40px;height:40px;border-radius:var(--radius-full);background:rgba(214,127,72,0.18);color:var(--color-accent-400);display:flex;align-items:center;justify-content:center;flex:none;">
+          ☀️
+        </div>
+        <div>
+          <h3 style="font-size:18px;color:var(--cream);line-height:1.15;">Display dauerhaft anlassen</h3>
+          <div style="font-size:11.5px;color:var(--color-accent-400);font-weight:600;margin-top:2px;">Tipp für ungestörtes Singen</div>
+        </div>
+      </div>
+
+      <p style="font-size:13px;color:var(--cream-dim);line-height:1.55;margin-bottom:14px;">
+        Die App aktiviert automatisch den Browser-WakeLock. Falls dein Handy das Display dennoch ausschaltet, kannst du den Timeout in den Einstellungen anpassen:
+      </p>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;font-size:12px;">
+        <div style="background:var(--ink);padding:12px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,0.06);">
+          <strong style="color:var(--cream);">🍎 iPhone / iPad:</strong>
+          <p style="color:var(--cream-muted);margin-top:2px;">Einstellungen ➔ Anzeige & Helligkeit ➔ Automatische Sperre ➔ <strong style="color:var(--cream);">Nie</strong></p>
+        </div>
+        <div style="background:var(--ink);padding:12px 14px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,0.06);">
+          <strong style="color:var(--cream);">🤖 Android:</strong>
+          <p style="color:var(--cream-muted);margin-top:2px;">Einstellungen ➔ Display ➔ Bildschirm-Timeout ➔ <strong style="color:var(--cream);">10–30 Min.</strong></p>
+        </div>
+      </div>
+
+      <button onclick="closeWakeLockModal()" style="width:100%;padding:13px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font-weight:700;font-size:14px;">
+        Alles klar, verstanden
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== 9. COMMUNITY DELETE CONFIRMATION MODAL ==================== -->
+  <div id="deleteConfirmModal" onclick="closeDeleteConfirmModal()" style="display:none;position:fixed;inset:0;background:rgba(16,13,11,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:300;align-items:center;justify-content:center;padding:20px;">
+    <div onclick="event.stopPropagation()" class="animate-scale-in" style="max-width:360px;width:100%;background:var(--ink-2);padding:24px;border-radius:var(--radius-xl);border:1px solid rgba(244,63,94,0.3);text-align:center;box-shadow:var(--shadow-lg);">
+      <div style="width:48px;height:48px;border-radius:var(--radius-full);background:rgba(244,63,94,0.18);color:#f43f5e;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;">
+        🗑️
+      </div>
+      <h3 style="font-size:18px;color:var(--cream);margin-bottom:4px;">Song aus Kreis löschen?</h3>
+      <p id="deleteTargetTitle" style="font-size:13px;font-weight:700;color:var(--color-accent-400);margin-bottom:14px;">Songtitel</p>
+      
+      <p style="font-size:12px;color:var(--cream-muted);line-height:1.5;margin-bottom:20px;">
+        Der Song wird aus der Community-Liste und auf allen synchronisierten Geräten entfernt.
+      </p>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeDeleteConfirmModal()" style="flex:1;padding:12px;border-radius:var(--radius-full);background:rgba(255,255,255,0.08);color:var(--cream-dim);font-weight:700;font-size:13px;">
+          Abbrechen
+        </button>
+        <button id="confirmDeleteBtn" onclick="executeDeleteCommunitySong()" style="flex:1;padding:12px;border-radius:var(--radius-full);background:#e11d48;color:white;font-weight:700;font-size:13px;">
+          Löschen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Pill -->
+  <div id="toastPill" style="display:none;position:fixed;left:50%;transform:translateX(-50%);top:24px;padding:11px 22px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font-weight:700;font-size:13px;box-shadow:var(--shadow-lg);z-index:950;white-space:nowrap;" class="animate-fade-in">
+    <span id="toastText">Hinweis</span>
+  </div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT LOGIK & DATEN
+       ========================================================================== -->
+  <script>
+    // Injected Data
+    /* SONGS_DATA_PLACEHOLDER */
+    /* MANTRAS_DATA_PLACEHOLDER */
+    /* ENV_CONFIG_PLACEHOLDER */
+
+    // Chromatic Scales for transposition
+    const CHROMATIC_SCALE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const FLAT_MAP = { "Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#" };
+
+    // App State
+    let activeFilter = 'all'; // 'all' | 'fav' | 'community'
+    let searchQuery = '';
+    let activeSongId = 'lean-on-me';
+    let transpositionOffset = 0;
+    let currentFontSize = 23;
+    let chordsVisible = true;
+    let stageDarkMode = false;
+    let stageToolsOpen = false;
+    let isAutoScrolling = false;
+    let autoScrollSpeed = 1.0;
+    let autoScrollInterval = null;
+    let favorites = [];
+    let communitySongs = [];
+    let researchedSuggestions = [];
+    let activeAiProgressTimer = null;
+    let wakeLockSentinel = null;
+    let deleteCandidateId = null;
+    let toastTimeout = null;
+    let stageInactivityTimer = null;
+
+    // Firebase state
+    let db = null;
+    let isFirebaseActive = false;
+    let unsubscribeFirestore = null;
+
+    // ==================== INITIALISIERUNG ====================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSavedState();
+      initFirebaseFromStorage();
+      renderSongList();
+      updateFilterCounts();
+
+      // Auto-dismiss splash screen after 3 seconds or on first tap
+      setTimeout(() => {
+        dismissSplashScreen();
+      }, 3200);
+
+      // Handle keyboard ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeAllSheets();
+        }
+      });
+
+      // Stage control inactivity fade listeners
+      const stageModal = document.getElementById('songModal');
+      if (stageModal) {
+        ['mousemove', 'pointermove', 'touchstart', 'touchmove', 'scroll', 'click', 'keydown'].forEach(ev => {
+          stageModal.addEventListener(ev, resetStageInactivityTimer, { passive: true });
+        });
+      }
+      const stageControls = document.getElementById('stageControlsWrapper');
+      if (stageControls) {
+        stageControls.addEventListener('mouseenter', () => {
+          if (stageControls) stageControls.style.opacity = '1';
+          if (stageInactivityTimer) clearTimeout(stageInactivityTimer);
+        });
+        stageControls.addEventListener('mouseleave', () => {
+          resetStageInactivityTimer();
+        });
+      }
+
+      // Initialize Pinch-to-Zoom & Wheel Zoom Gestures
+      initStageZoomGestures();
+    });
+
+    function loadSavedState() {
+      try {
+        favorites = JSON.parse(localStorage.getItem('singkreis_favorites') || '[]');
+        communitySongs = JSON.parse(localStorage.getItem('singkreis_community_songs') || '[]');
+        currentFontSize = parseInt(localStorage.getItem('singkreis_font_size') || '23', 10);
+        chordsVisible = localStorage.getItem('singkreis_chords_visible') !== 'false';
+        stageDarkMode = localStorage.getItem('singkreis_stage_dark') === 'true';
+
+        const savedGeminiKey = localStorage.getItem('singkreis_gemini_key') || (typeof ENV_CONFIG !== 'undefined' ? ENV_CONFIG.GEMINI_API_KEY : '') || '';
+        const keyInput = document.getElementById('geminiApiKeyInput');
+        if (keyInput && savedGeminiKey) {
+          keyInput.value = savedGeminiKey;
+        }
+        updateApiKeyStatus();
+      } catch (e) {
+        console.error('Error loading saved state:', e);
+      }
+    }
+
+    // ==================== FULLSCREEN AUTO-START & TOGGLE ====================
+    function enterFullscreen() {
+      try {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          const docEl = document.documentElement;
+          if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(() => {});
+          } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen();
+          }
+        }
+      } catch (e) {}
+    }
+
+    function toggleFullscreen() {
+      try {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          enterFullscreen();
+          showToast('Vollbild aktiviert ⛶');
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+          showToast('Vollbild beendet');
+        }
+      } catch (e) {}
+    }
+
+    // Automatically enter fullscreen on first user touch or click
+    document.addEventListener('click', () => enterFullscreen(), { once: true });
+    document.addEventListener('touchstart', () => enterFullscreen(), { once: true });
+
+    // ==================== QR CODE LIGHTBOX ====================
+    function openQrLightbox() {
+      const modal = document.getElementById('qrFullscreenModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeQrLightbox() {
+      const modal = document.getElementById('qrFullscreenModal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    }
+    function openQrFullscreen() { openQrLightbox(); }
+    function closeQrFullscreen() { closeQrLightbox(); }
+
+    function dismissSplashScreen() {
+      enterFullscreen();
+      const splash = document.getElementById('splashScreen');
+      if (splash && splash.style.display !== 'none') {
+        splash.style.opacity = '0';
+        splash.style.transition = 'opacity 0.4s ease-out';
+        setTimeout(() => {
+          splash.style.display = 'none';
+        }, 400);
+
+        // Optional intro audio
+        try {
+          const audio = new Audio('intro.mp3');
+          audio.play().catch(() => {});
+        } catch (e) {}
+      }
+    }
+
+    function showToast(msg) {
+      const pill = document.getElementById('toastPill');
+      const text = document.getElementById('toastText');
+      if (!pill || !text) return;
+      text.textContent = msg;
+      pill.style.display = 'block';
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        pill.style.display = 'none';
+      }, 2400);
+    }
+
+    // ==================== SONG TRANSFORMATION & CHORDS ====================
+    function shiftChord(token, semitones) {
+      if (!semitones) return token;
+      return token.replace(/[A-G][#b]?[^\s\/]*/g, (c) => {
+        const m = c.match(/^([A-G])([#b]?)(.*)$/);
+        if (!m) return c;
+        let root = m[1] + m[2];
+        if (FLAT_MAP[root]) root = FLAT_MAP[root];
+        const idx = CHROMATIC_SCALE.indexOf(root);
+        if (idx < 0) return c;
+        const newRoot = CHROMATIC_SCALE[(idx + semitones + 120) % 12];
+        return newRoot + m[3];
+      });
+    }
+
+    function shiftChordLine(line, semitones) {
+      if (!semitones) return line;
+      return line.replace(/[A-G][#b]?[^\s]*/g, (t) => shiftChord(t, semitones));
+    }
+
+    function isLikelyChordLine(line) {
+      const t = line.trim();
+      if (!t || t.startsWith('[')) return false;
+      return /^[A-G#b0-9majinsud\/\s()\-+]+$/.test(t) && /[A-G]/.test(t) && t.replace(/\s/g, '').length <= 32;
+    }
+
+    // ==================== SONG LIST RENDERING ====================
+    function getAllSongs() {
+      const all = [...SONGS];
+      communitySongs.forEach(cs => {
+        if (!all.some(s => s.id === cs.id)) {
+          all.push(cs);
+        }
+      });
+      return all;
+    }
+
+    function setFilter(filterType) {
+      activeFilter = filterType;
+      document.querySelectorAll('[id^="chip-"]').forEach(btn => {
+        btn.style.background = 'transparent';
+        btn.style.border = '1px solid rgba(255,255,255,0.14)';
+        btn.style.color = 'var(--cream-dim)';
+      });
+
+      const activeBtn = document.getElementById('chip-' + filterType);
+      if (activeBtn) {
+        activeBtn.style.background = 'var(--color-accent-500)';
+        activeBtn.style.border = '1px solid var(--color-accent-500)';
+        activeBtn.style.color = 'var(--ink)';
+      }
+
+      renderSongList();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.style.display = searchQuery ? 'flex' : 'none';
+      renderSongList();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      if (input) input.value = '';
+      searchQuery = '';
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.style.display = 'none';
+      renderSongList();
+    }
+
+    function resetFilters() {
+      clearSearch();
+      setFilter('all');
+    }
+
+    function renderSongCard(s) {
+      const isFav = favorites.includes(s.id);
+      const keyColorBg = s.isCommunity ? 'rgba(174,191,146,0.16)' : 'rgba(214,127,72,0.16)';
+      const keyColorFg = s.isCommunity ? 'var(--color-accent-2-300)' : 'var(--color-accent-400)';
+      const keyText = s.originalKey || 'C';
+      const metaText = (s.artist || '') + ' · ' + (s.year ? s.year : 'neu') + ' · ' + (s.tempo ? s.tempo + ' BPM' : '80 BPM');
+
+      return `
+        <div onclick="openSongModal('${s.id}')" style="background:var(--ink-card);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;border:1px solid rgba(255,255,255,0.05);transition:all 0.15s ease;">
+          <!-- Key Circle -->
+          <div style="width:44px;height:44px;border-radius:var(--radius-full);background:${keyColorBg};color:${keyColorFg};display:flex;align-items:center;justify-content:center;font-family:var(--font-chord);font-weight:700;font-size:15px;flex:none;">
+            ${escapeHtml(keyText)}
+          </div>
+
+          <!-- Title & Artist -->
+          <div style="min-width:0;flex:1;">
+            <div style="font-family:var(--font-heading);font-size:17.5px;line-height:1.2;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${escapeHtml(s.title)}
+            </div>
+            <div style="font-size:12.5px;color:var(--cream-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">
+              ${escapeHtml(metaText)}
+            </div>
+          </div>
+
+          <!-- Action: Delete (Community) & Favorite Heart -->
+          <div style="display:flex;align-items:center;gap:4px;flex:none;" onclick="event.stopPropagation()">
+            ${s.isCommunity ? `
+              <button onclick="promptDeleteCommunitySong('${s.id}', '${escapeHtml(s.title)}')" style="width:34px;height:34px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;color:var(--cream-muted);transition:color 0.15s ease;" title="Song löschen">
+                <svg style="width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            ` : ''}
+
+            <button onclick="toggleFavorite('${s.id}')" style="width:34px;height:34px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;color:${isFav ? 'var(--color-accent-400)' : 'var(--cream-muted)'};transition:all 0.15s ease;" title="Gemerkt">
+              <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSongList() {
+      const container = document.getElementById('songsListContainer');
+      const emptyBox = document.getElementById('emptyResultsBox');
+      const sectionTitle = document.getElementById('listSectionTitle');
+      const sortVal = document.getElementById('sortSelect')?.value || 'popularity';
+      if (!container) return;
+
+      const all = getAllSongs();
+
+      // Update Section Header Title
+      if (sectionTitle) {
+        if (searchQuery) {
+          sectionTitle.textContent = 'Suchergebnisse';
+        } else if (activeFilter === 'fav') {
+          sectionTitle.textContent = 'Gemerkt (' + favorites.length + ')';
+        } else if (activeFilter === 'community') {
+          sectionTitle.textContent = 'Aus dem Kreis (' + communitySongs.length + ')';
+        } else {
+          sectionTitle.textContent = 'Liederbuch (' + SONGS.length + ')';
+        }
+      }
+
+      if (activeFilter === 'all' && !searchQuery) {
+        // 1. Standard Songs
+        const standardList = [...SONGS];
+        sortSongArray(standardList, sortVal);
+        const standardHtml = standardList.map(s => renderSongCard(s)).join('');
+
+        // 2. Community Songs section at bottom of list
+        let commHtml = '';
+        if (communitySongs.length > 0) {
+          const commList = [...communitySongs];
+          sortSongArray(commList, sortVal);
+          commHtml = `
+            <div style="margin-top:22px;margin-bottom:6px;padding:8px 6px 4px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;">
+              <div style="font:700 11px/1 var(--font-body);letter-spacing:0.18em;text-transform:uppercase;color:var(--color-accent-2-400);">
+                Aus dem Kreis (${communitySongs.length})
+              </div>
+              <span style="font-size:11px;color:var(--cream-muted);">Neu hinzugefügt</span>
+            </div>
+            ${commList.map(s => renderSongCard(s)).join('')}
+          `;
+        } else {
+          commHtml = `
+            <div style="margin-top:22px;padding:15px 18px;border-radius:var(--radius-lg);border:1px dashed rgba(174,191,146,0.22);background:rgba(174,191,146,0.02);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <div>
+                <div style="font-size:13.5px;font-weight:700;color:var(--cream);">Aus dem Kreis · 0 Lieder</div>
+                <div style="font-size:11.5px;color:var(--cream-muted);margin-top:2px;">Neue Lieder mit AI hinzufügen</div>
+              </div>
+              <button onclick="openAiSheet()" style="padding:7px 14px;border-radius:var(--radius-full);background:rgba(174,191,146,0.16);color:var(--color-accent-2-300);font:700 12px/1 var(--font-body);cursor:pointer;">+ Song</button>
+            </div>
+          `;
+        }
+
+        if (emptyBox) emptyBox.style.display = 'none';
+        container.innerHTML = standardHtml + commHtml;
+        updateFilterCounts();
+        return;
+      }
+
+      // Filtered mode (fav, community, or search)
+      let filtered = all.filter(s => {
+        if (activeFilter === 'fav' && !favorites.includes(s.id)) return false;
+        if (activeFilter === 'community' && !s.isCommunity) return false;
+
+        if (searchQuery) {
+          const matchTitle = (s.title || '').toLowerCase().includes(searchQuery);
+          const matchArtist = (s.artist || '').toLowerCase().includes(searchQuery);
+          const matchMessage = (s.message || '').toLowerCase().includes(searchQuery);
+          const matchContent = (s.content || '').toLowerCase().includes(searchQuery);
+          return matchTitle || matchArtist || matchMessage || matchContent;
+        }
+        return true;
+      });
+
+      sortSongArray(filtered, sortVal);
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        if (emptyBox) {
+          emptyBox.style.display = 'block';
+          const sub = document.getElementById('emptyResultsSub');
+          if (sub && searchQuery) {
+            sub.textContent = '„' + searchQuery + '“ finden wir für dich — mit vollständigem Text und passenden Akkorden.';
+          }
+        }
+        updateFilterCounts();
+        return;
+      }
+
+      if (emptyBox) emptyBox.style.display = 'none';
+      container.innerHTML = filtered.map(s => renderSongCard(s)).join('');
+      updateFilterCounts();
+    }
+
+    function sortSongArray(arr, sortVal) {
+      arr.sort((a, b) => {
+        if (sortVal === 'popularity') {
+          const popA = a.popularity !== undefined ? a.popularity : (a.isCommunity ? 80 : 70);
+          const popB = b.popularity !== undefined ? b.popularity : (b.isCommunity ? 80 : 70);
+          if (popB !== popA) return popB - popA;
+          return (a.title || '').localeCompare(b.title || '');
+        }
+        if (sortVal === 'title') return (a.title || '').localeCompare(b.title || '');
+        if (sortVal === 'artist') return (a.artist || '').localeCompare(b.artist || '');
+        if (sortVal === 'year_desc') return (b.year || 0) - (a.year || 0);
+        if (sortVal === 'year_asc') return (a.year || 0) - (b.year || 0);
+        if (sortVal === 'tempo') return (b.tempo || 0) - (a.tempo || 0);
+        if (sortVal === 'community') return (b.isCommunity ? 1 : 0) - (a.isCommunity ? 1 : 0);
+        return 0;
+      });
+    }
+
+    function updateFilterCounts() {
+      const all = getAllSongs();
+      const countAll = document.getElementById('count-all');
+      const countFav = document.getElementById('count-fav');
+      const countComm = document.getElementById('count-community');
+      const commFooter = document.getElementById('communityFooterText');
+
+      const commCount = all.filter(s => s.isCommunity).length;
+
+      if (countAll) countAll.textContent = all.length;
+      if (countFav) countFav.textContent = favorites.length;
+      if (countComm) countComm.textContent = commCount;
+      if (commFooter) commFooter.textContent = 'Aus dem Kreis · ' + commCount + ' Lieder';
+    }
+
+    function toggleFavorite(id) {
+      if (favorites.includes(id)) {
+        favorites = favorites.filter(f => f !== id);
+      } else {
+        favorites.push(id);
+      }
+      localStorage.setItem('singkreis_favorites', JSON.stringify(favorites));
+      renderSongList();
+      updateStageFavButton();
+    }
+
+    function toggleActiveSongFavorite() {
+      if (!activeSongId) return;
+      toggleFavorite(activeSongId);
+    }
+
+    function updateStageFavButton() {
+      const btn = document.getElementById('stageFavBtn');
+      const icon = document.getElementById('stageFavIcon');
+      if (!btn || !icon || !activeSongId) return;
+
+      const isFav = favorites.includes(activeSongId);
+      btn.style.color = isFav ? 'var(--color-accent-400)' : 'var(--cream-dim)';
+      icon.setAttribute('fill', isFav ? 'currentColor' : 'none');
+    }
+
+    // ==================== 3. STAGE / NOTENSTÄNDER VIEW ====================
+    function openSongModal(id) {
+      const all = getAllSongs();
+      const song = all.find(s => s.id === id) || all[0];
+      if (!song) return;
+
+      activeSongId = song.id;
+      transpositionOffset = 0;
+      stageToolsOpen = false;
+      stopAutoScroll();
+
+      const modal = document.getElementById('songModal');
+      const titleEl = document.getElementById('stageSongTitle');
+      const metaEl = document.getElementById('stageSongMeta');
+      const msgEl = document.getElementById('stageMessageText');
+      const msgPill = document.getElementById('stageMessagePill');
+      const ytBtn = document.getElementById('stageYoutubeBtn');
+
+      if (titleEl) titleEl.textContent = song.title;
+      if (metaEl) metaEl.textContent = (song.artist || '') + ' · ' + (song.year || 'neu') + ' · ' + (song.tempo || 80) + ' BPM';
+      if (msgEl) msgEl.textContent = song.message || 'Lagerfeuer- & Singkreis-Lied';
+      if (msgPill) msgPill.style.display = song.message ? 'inline-flex' : 'none';
+
+      if (ytBtn) {
+        ytBtn.href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent((song.artist || '') + ' ' + (song.title || ''));
+      }
+
+      applyStageTheme();
+      renderStageContent();
+      updateStageFavButton();
+
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+
+      // Scroll to top of stage
+      const scrollArea = document.getElementById('stageScrollArea');
+      if (scrollArea) scrollArea.scrollTop = 0;
+
+      // Enter fullscreen and wake lock
+      enterFullscreen();
+      requestWakeLock();
+
+      // Start inactivity timer for floating controls
+      resetStageInactivityTimer();
+    }
+
+    function closeSongModal() {
+      stopBpmTock();
+      stopAutoScroll();
+      if (stageInactivityTimer) {
+        clearTimeout(stageInactivityTimer);
+        stageInactivityTimer = null;
+      }
+      const controls = document.getElementById('stageControlsWrapper');
+      if (controls) controls.style.opacity = '1';
+
+      const modal = document.getElementById('songModal');
+      if (modal) modal.style.display = 'none';
+      document.body.style.overflow = '';
+      releaseWakeLock();
+    }
+
+    function resetStageInactivityTimer() {
+      const controls = document.getElementById('stageControlsWrapper');
+      if (controls) {
+        controls.style.opacity = '1';
+      }
+      if (stageInactivityTimer) {
+        clearTimeout(stageInactivityTimer);
+        stageInactivityTimer = null;
+      }
+
+      const modal = document.getElementById('songModal');
+      if (modal && modal.style.display !== 'none') {
+        stageInactivityTimer = setTimeout(() => {
+          if (controls) {
+            controls.style.opacity = '0.1'; // 90% transparent after 2s inactivity
+          }
+        }, 2000);
+      }
+    }
+
+    function renderStageContent() {
+      const all = getAllSongs();
+      const song = all.find(s => s.id === activeSongId) || all[0];
+      const bodyEl = document.getElementById('stageLyricsBody');
+      const badgesEl = document.getElementById('stageChordsBadges');
+      const keyDisplay = document.getElementById('stageCurrentKeyDisplay');
+      if (!song || !bodyEl) return;
+
+      // Update Key Display
+      const originalKey = song.originalKey || 'C';
+      const shiftedKey = shiftChord(originalKey.replace(/m$/, ''), transpositionOffset) + (originalKey.endsWith('m') ? 'm' : '');
+      if (keyDisplay) keyDisplay.textContent = shiftedKey;
+
+      const rawLines = (song.content || '').split('\n');
+      const htmlLines = [];
+      const chordSet = [];
+
+      rawLines.forEach(raw => {
+        const trimmed = raw.trim();
+        if (!trimmed) {
+          htmlLines.push('<div style="height:12px;"></div>');
+          return;
+        }
+
+        // Section [Strophe 1], [Refrain], etc.
+        const secMatch = trimmed.match(/^\[(.+)\]$/);
+        if (secMatch) {
+          htmlLines.push(`<div class="section-badge">${escapeHtml(secMatch[1])}</div>`);
+          return;
+        }
+
+        // Chord line vs Lyric line
+        if (isLikelyChordLine(raw)) {
+          // Extract chords for badges
+          const tokens = raw.match(/[A-G][#b]?[^\s]*/g) || [];
+          tokens.forEach(t => {
+            const shifted = shiftChord(t, transpositionOffset);
+            if (!chordSet.includes(shifted)) chordSet.push(shifted);
+          });
+
+          if (chordsVisible) {
+            const shiftedLine = shiftChordLine(raw, transpositionOffset);
+            htmlLines.push(`<div class="chord-line">${escapeHtml(shiftedLine)}</div>`);
+          }
+          return;
+        }
+
+        // Standard lyric line
+        htmlLines.push(`<div class="lyric-line">${escapeHtml(raw)}</div>`);
+      });
+
+      bodyEl.style.fontSize = currentFontSize + 'px';
+      bodyEl.innerHTML = htmlLines.join('');
+
+      // Render Badges at bottom
+      if (badgesEl) {
+        badgesEl.innerHTML = chordSet.map(c => `
+          <span style="padding:6px 14px;border-radius:var(--radius-full);background:${stageDarkMode ? 'rgba(214,127,72,0.16)' : 'rgba(36,29,22,0.08)'};color:${stageDarkMode ? 'var(--color-accent-300)' : 'var(--color-accent-700)'};font:700 13.5px/1 var(--font-chord);">
+            ${escapeHtml(c)}
+          </span>
+        `).join('');
+      }
+
+      // Update tools drawer display
+      const fsDisplay = document.getElementById('toolsFontSizeDisplay');
+      if (fsDisplay) fsDisplay.textContent = currentFontSize;
+
+      const toggleChordsBtn = document.getElementById('toggleChordsBtn');
+      if (toggleChordsBtn) {
+        toggleChordsBtn.textContent = chordsVisible ? 'Akkorde ausblenden' : 'Akkorde anzeigen';
+      }
+
+      const bpm = (song && song.tempo) ? parseInt(song.tempo, 10) : 80;
+      const tockText = document.getElementById('bpmTockText');
+      if (tockText && !isTocking) {
+        tockText.textContent = bpm + ' BPM Tock';
+      }
+    }
+
+    function transposeSong(semitones) {
+      transpositionOffset = Math.max(-11, Math.min(11, transpositionOffset + semitones));
+      renderStageContent();
+    }
+
+    function adjustFontSize(delta, silent = false) {
+      currentFontSize = Math.max(12, Math.min(64, currentFontSize + delta));
+      localStorage.setItem('singkreis_font_size', currentFontSize.toString());
+      renderStageContent();
+      if (!silent) {
+        showZoomHud(currentFontSize);
+        hideZoomHud();
+      }
+    }
+
+    // ==================== HIGH-PERFORMANCE PINCH-TO-ZOOM & WHEEL ZOOM ====================
+    let initialPinchDistance = 0;
+    let initialPinchFontSize = 23;
+    let isPinching = false;
+    let zoomHudTimeout = null;
+
+    function showZoomHud(size) {
+      const hud = document.getElementById('stageZoomHud');
+      const val = document.getElementById('stageZoomHudVal');
+      if (hud && val) {
+        val.textContent = size;
+        hud.style.display = 'block';
+        hud.style.opacity = '1';
+        if (zoomHudTimeout) clearTimeout(zoomHudTimeout);
+      }
+    }
+
+    function hideZoomHud() {
+      if (zoomHudTimeout) clearTimeout(zoomHudTimeout);
+      zoomHudTimeout = setTimeout(() => {
+        const hud = document.getElementById('stageZoomHud');
+        if (hud) {
+          hud.style.opacity = '0';
+          setTimeout(() => { hud.style.display = 'none'; }, 200);
+        }
+      }, 700);
+    }
+
+    function applyZoomFontSize(size, isFinal = false) {
+      currentFontSize = Math.max(12, Math.min(64, Math.round(size)));
+      const bodyEl = document.getElementById('stageLyricsBody');
+      if (bodyEl) {
+        bodyEl.style.fontSize = currentFontSize + 'px';
+      }
+      const fsDisplay = document.getElementById('toolsFontSizeDisplay');
+      if (fsDisplay) {
+        fsDisplay.textContent = currentFontSize;
+      }
+      showZoomHud(currentFontSize);
+
+      if (isFinal) {
+        localStorage.setItem('singkreis_font_size', currentFontSize.toString());
+        hideZoomHud();
+      }
+    }
+
+    function initStageZoomGestures() {
+      const stageModal = document.getElementById('songModal');
+      if (!stageModal) return;
+
+      // 1. Touchscreen Pinch-to-Zoom (2 Fingers anywhere on Stage View)
+      stageModal.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+          isPinching = true;
+          initialPinchDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          initialPinchFontSize = currentFontSize;
+          resetStageInactivityTimer();
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (isPinching && e.touches.length === 2) {
+          if (e.cancelable) e.preventDefault(); // Prevent native browser full page zoom
+          const currentDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          if (initialPinchDistance > 10) {
+            const factor = currentDistance / initialPinchDistance;
+            const targetSize = initialPinchFontSize * factor;
+            applyZoomFontSize(targetSize, false);
+          }
+          resetStageInactivityTimer();
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchend', (e) => {
+        if (isPinching) {
+          if (e.touches.length < 2) {
+            isPinching = false;
+            applyZoomFontSize(currentFontSize, true);
+          }
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchcancel', () => {
+        if (isPinching) {
+          isPinching = false;
+          applyZoomFontSize(currentFontSize, true);
+        }
+      }, { passive: true });
+
+      // 2. Desktop Ctrl + Mousewheel Zoom
+      stageModal.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          const delta = e.deltaY < 0 ? 1.5 : -1.5;
+          applyZoomFontSize(currentFontSize + delta, true);
+          resetStageInactivityTimer();
+        }
+      }, { passive: false });
+    }
+
+    function toggleChords() {
+      chordsVisible = !chordsVisible;
+      localStorage.setItem('singkreis_chords_visible', chordsVisible.toString());
+      renderStageContent();
+      showToast(chordsVisible ? 'Akkorde aktiviert 🎸' : 'Nur Text ✍️');
+    }
+
+    function toggleStageDarkMode() {
+      stageDarkMode = !stageDarkMode;
+      localStorage.setItem('singkreis_stage_dark', stageDarkMode.toString());
+      applyStageTheme();
+      renderStageContent();
+    }
+
+    function applyStageTheme() {
+      const modal = document.getElementById('songModal');
+      const icon = document.getElementById('stageDarkIcon');
+      if (!modal) return;
+
+      if (stageDarkMode) {
+        modal.classList.add('stage-dark');
+        if (icon) icon.innerHTML = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>';
+      } else {
+        modal.classList.remove('stage-dark');
+        if (icon) icon.innerHTML = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>';
+      }
+    }
+
+    // ==================== BPM METRONOME TOCK ====================
+    let tockAudioCtx = null;
+    let tockTimeoutId = null;
+    let isTocking = false;
+
+    function getCurrentStageSong() {
+      const all = getAllSongs();
+      return all.find(s => s.id === activeSongId) || all[0];
+    }
+
+    function playSingleTock(isFirst) {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!tockAudioCtx) {
+          tockAudioCtx = new AudioContextClass();
+        }
+        if (tockAudioCtx.state === 'suspended') {
+          tockAudioCtx.resume();
+        }
+
+        const now = tockAudioCtx.currentTime;
+        const osc = tockAudioCtx.createOscillator();
+        const gain = tockAudioCtx.createGain();
+
+        // Warm, pleasant acoustic woodblock click tone
+        const freq = isFirst ? 940 : 740;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(160, now + 0.04);
+
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+
+        osc.connect(gain);
+        gain.connect(tockAudioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } catch (e) {
+        console.warn('Audio Tock error:', e);
+      }
+    }
+
+    function stopBpmTock() {
+      if (tockTimeoutId) {
+        clearTimeout(tockTimeoutId);
+        tockTimeoutId = null;
+      }
+      isTocking = false;
+      const btn = document.getElementById('bpmTockBtn');
+      const text = document.getElementById('bpmTockText');
+      if (btn) {
+        btn.style.background = 'rgba(255,255,255,0.08)';
+        btn.style.color = 'var(--cream-dim)';
+      }
+      const song = getCurrentStageSong();
+      const bpm = (song && song.tempo) ? parseInt(song.tempo, 10) : 80;
+      if (text) text.textContent = bpm + ' BPM Tock';
+    }
+
+    function playBpmTock() {
+      if (isTocking) {
+        stopBpmTock();
+        return;
+      }
+
+      resetStageInactivityTimer();
+      const song = getCurrentStageSong();
+      const bpm = (song && song.tempo) ? Math.max(30, Math.min(300, parseInt(song.tempo, 10))) : 80;
+      const intervalMs = (60 / bpm) * 1000;
+
+      isTocking = true;
+      let count = 0;
+      const totalTocks = 12; // 3 Takte à 4 Beats = 12 Tocks
+
+      const btn = document.getElementById('bpmTockBtn');
+      const text = document.getElementById('bpmTockText');
+
+      if (btn) {
+        btn.style.background = 'var(--color-accent-500)';
+        btn.style.color = 'var(--ink)';
+      }
+
+      showToast(`Tempo: ${bpm} BPM (3 Takte · 12 Tocks) 🥁`);
+
+      function tick() {
+        if (!isTocking) return;
+        count++;
+        const isBarStart = ((count - 1) % 4 === 0);
+        const currentBar = Math.floor((count - 1) / 4) + 1;
+        const currentBeatInBar = ((count - 1) % 4) + 1;
+
+        playSingleTock(isBarStart);
+        if (text) text.textContent = `Takt ${currentBar}/3 · ${currentBeatInBar}/4 (${bpm} BPM)`;
+        resetStageInactivityTimer();
+
+        if (count < totalTocks) {
+          tockTimeoutId = setTimeout(tick, intervalMs);
+        } else {
+          setTimeout(() => {
+            stopBpmTock();
+          }, 350);
+        }
+      }
+
+      tick();
+    }
+
+    function toggleStageTools() {
+      stageToolsOpen = !stageToolsOpen;
+      const drawer = document.getElementById('stageToolsDrawer');
+      const btn = document.getElementById('stageToolsToggleBtn');
+      if (drawer) drawer.style.display = stageToolsOpen ? 'block' : 'none';
+      if (btn) {
+        btn.style.background = stageToolsOpen ? 'var(--color-accent-500)' : 'rgba(255,255,255,0.08)';
+        btn.style.color = stageToolsOpen ? 'var(--ink)' : 'var(--cream-dim)';
+      }
+      resetStageInactivityTimer();
+    }
+
+    // ==================== AUTO-SCROLL LOGIC ====================
+    function toggleAutoScroll() {
+      if (isAutoScrolling) {
+        stopAutoScroll();
+      } else {
+        startAutoScroll();
+      }
+    }
+
+    function startAutoScroll() {
+      stopAutoScroll();
+      isAutoScrolling = true;
+      updateAutoScrollUI();
+
+      const scrollArea = document.getElementById('stageScrollArea');
+      autoScrollInterval = setInterval(() => {
+        if (scrollArea) {
+          // Dynamic scroll speed scaled proportionally with font size (baseline: 23px)
+          const fontSizeFactor = currentFontSize / 23;
+          scrollArea.scrollTop += autoScrollSpeed * 0.9 * fontSizeFactor;
+        }
+      }, 30);
+    }
+
+    function stopAutoScroll() {
+      if (autoScrollInterval) {
+        clearInterval(autoScrollInterval);
+        autoScrollInterval = null;
+      }
+      isAutoScrolling = false;
+      updateAutoScrollUI();
+    }
+
+    function updateAutoScrollUI() {
+      const playBtn = document.getElementById('stageScrollPlayBtn');
+      const playIcon = document.getElementById('stageScrollPlayIcon');
+      const pauseIcon = document.getElementById('stageScrollPauseIcon');
+      const label = document.getElementById('stageScrollLabel');
+      const btnText = document.getElementById('stageScrollBtnText');
+
+      if (playBtn) {
+        playBtn.style.background = isAutoScrolling ? 'rgba(214,127,72,0.22)' : 'var(--color-accent-500)';
+        playBtn.style.color = isAutoScrolling ? 'var(--color-accent-400)' : 'var(--ink)';
+      }
+      if (playIcon) playIcon.style.display = isAutoScrolling ? 'none' : 'block';
+      if (pauseIcon) pauseIcon.style.display = isAutoScrolling ? 'block' : 'none';
+      if (btnText) btnText.textContent = isAutoScrolling ? 'Pausieren' : 'Scrollen';
+      if (label) label.innerHTML = `
+        <svg style="width:13px;height:13px;color:var(--color-accent-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+        ${isAutoScrolling ? 'Läuft mit' : 'Auto-Scroll Geschwindigkeit'}
+      `;
+    }
+
+    function handleSpeedChange(val) {
+      autoScrollSpeed = parseFloat(val);
+      const valEl = document.getElementById('stageSpeedValue');
+      const rangeEl = document.getElementById('scrollSpeedRange');
+      if (valEl) valEl.textContent = autoScrollSpeed.toFixed(1) + '×';
+
+      if (rangeEl) {
+        const pct = ((autoScrollSpeed - 0.2) / 3.8) * 100;
+        rangeEl.style.background = `linear-gradient(90deg, var(--color-accent-500) ${pct}%, rgba(255,255,255,0.14) ${pct}%)`;
+      }
+    }
+
+    // ==================== 4. MANTRAS SHEET LOGIC ====================
+    function openMantrasSheet() {
+      const sheet = document.getElementById('mantrasSheet');
+      if (sheet) sheet.style.display = 'flex';
+      renderMantrasList();
+    }
+
+    function closeMantrasSheet() {
+      const sheet = document.getElementById('mantrasSheet');
+      if (sheet) sheet.style.display = 'none';
+    }
+
+    function handleMantraSearch(query) {
+      renderMantrasList(query.trim().toLowerCase());
+    }
+
+    function renderMantrasList(q = '') {
+      const container = document.getElementById('mantrasListContainer');
+      const sub = document.getElementById('mantrasSubtitle');
+      if (!container) return;
+
+      const filtered = MANTRAS.filter(m => {
+        if (!q) return true;
+        return (m.title || '').toLowerCase().includes(q) || (m.artist || '').toLowerCase().includes(q);
+      });
+
+      if (sub) sub.textContent = filtered.length + ' von ' + MANTRAS.length + ' · Tippen startet Songsuche';
+
+      container.innerHTML = filtered.map((m, idx) => `
+        <div onclick="selectMantraForAiSearch('${escapeHtml(m.title)}', '${escapeHtml(m.artist)}')" style="padding:13px 15px;border-radius:var(--radius-lg);background:rgba(255,255,255,0.04);display:flex;align-items:center;gap:12px;cursor:pointer;border:1px solid rgba(255,255,255,0.04);transition:all 0.15s ease;">
+          <div style="min-width:0;flex:1;">
+            <div style="font-size:15px;font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${escapeHtml(m.title)}
+            </div>
+            <div style="font-size:12px;color:var(--cream-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${escapeHtml(m.artist || 'Traditionell')}
+            </div>
+          </div>
+          <svg style="width:16px;height:16px;color:var(--color-accent-2-300);flex:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+      `).join('');
+    }
+
+    function pickRandomMantra() {
+      const m = MANTRAS[Math.floor(Math.random() * MANTRAS.length)];
+      selectMantraForAiSearch(m.title, m.artist);
+    }
+
+    function selectMantraForAiSearch(title, artist) {
+      closeMantrasSheet();
+      openAiSheet(title + ' ' + (artist || ''));
+      handleFindSingleSong();
+    }
+
+    // ==================== 5. AI SONG GENERATION (GEMINI FLASH) ====================
+    function openAiSheet(prefill = '') {
+      const sheet = document.getElementById('aiSheet');
+      const input = document.getElementById('aiSongSearchInput');
+      const progressBox = document.getElementById('aiProgressBox');
+      const resultsWrapper = document.getElementById('aiResultsWrapper');
+
+      if (progressBox) progressBox.style.display = 'none';
+      if (resultsWrapper) resultsWrapper.style.display = 'none';
+      if (input) input.value = prefill || '';
+
+      if (sheet) sheet.style.display = 'flex';
+      updateApiKeyStatus();
+    }
+
+    function openAiSheetFromSearch() {
+      openAiSheet(searchQuery);
+      if (searchQuery) handleFindSingleSong();
+    }
+
+    function closeAiSheet() {
+      if (activeAiProgressTimer) clearInterval(activeAiProgressTimer);
+      const sheet = document.getElementById('aiSheet');
+      if (sheet) sheet.style.display = 'none';
+    }
+
+    function toggleApiKeyAccordion() {
+      const acc = document.getElementById('apiKeyAccordion');
+      if (acc) {
+        acc.style.display = acc.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    function saveGeminiApiKey(val) {
+      localStorage.setItem('singkreis_gemini_key', val.trim());
+      updateApiKeyStatus();
+    }
+
+    async function getActiveGeminiKey() {
+      const localKey = (localStorage.getItem('singkreis_gemini_key') || '').trim();
+      if (localKey) return localKey;
+      if (typeof ENV_CONFIG !== 'undefined' && ENV_CONFIG.GEMINI_API_KEY) {
+        return ENV_CONFIG.GEMINI_API_KEY.trim();
+      }
+      return '';
+    }
+
+    async function updateApiKeyStatus() {
+      const label = document.getElementById('apiKeyStatusLabel');
+      const key = await getActiveGeminiKey();
+      if (label) {
+        label.textContent = key ? 'API Key • Aktiv' : 'API Key eingeben';
+      }
+    }
+
+    async function callGeminiFlashAPI(promptText, savedKey) {
+      const models = [
+        "gemini-3.6-flash",
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash"
+      ];
+      let lastError = null;
+
+      for (const model of models) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${savedKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }],
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.2
+              }
+            })
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            const errMsg = errData?.error?.message || `API Fehler (${response.status})`;
+            if (errMsg.includes("no longer available") || errMsg.includes("not found") || response.status === 404) {
+              lastError = new Error(errMsg);
+              continue;
+            }
+            throw new Error(errMsg);
+          }
+
+          const resData = await response.json();
+          const rawJson = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawJson) throw new Error("Keine Antwort von Gemini erhalten.");
+
+          const cleaned = rawJson.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+          return JSON.parse(cleaned);
+        } catch (err) {
+          lastError = err;
+          if (err.message && (err.message.includes("no longer available") || err.message.includes("not found"))) {
+            continue;
+          }
+          throw err;
+        }
+      }
+      throw lastError || new Error("Kein kompatibles Gemini-Modell gefunden.");
+    }
+
+    function showAiProgress(title, subtext) {
+      const box = document.getElementById('aiProgressBox');
+      const titleEl = document.getElementById('aiProgressTitle');
+      const subEl = document.getElementById('aiProgressSub');
+      const fillEl = document.getElementById('aiProgressBarFill');
+      const pctEl = document.getElementById('aiProgressPercent');
+
+      if (!box) return null;
+      if (activeAiProgressTimer) clearInterval(activeAiProgressTimer);
+
+      box.style.display = 'block';
+      if (titleEl) titleEl.textContent = title;
+      if (subEl) subEl.textContent = subtext;
+
+      let pct = 8;
+      const updateUi = (p) => {
+        if (fillEl) fillEl.style.width = p + '%';
+        if (pctEl) pctEl.textContent = Math.round(p) + '%';
+      };
+      updateUi(pct);
+
+      activeAiProgressTimer = setInterval(() => {
+        if (pct < 88) {
+          pct += Math.floor(Math.random() * 6) + 3;
+          if (pct > 88) pct = 88;
+          updateUi(pct);
+
+          if (pct > 25 && pct <= 50 && subEl) subEl.textContent = 'Analysiere Tonart, Takt & Original-Künstler…';
+          else if (pct > 50 && pct <= 75 && subEl) subEl.textContent = 'Schreibe Strophen, Refrain & Struktur…';
+          else if (pct > 75 && subEl) subEl.textContent = 'Setze präzise Gitarrengriffe über die Zeilen…';
+        }
+      }, 260);
+
+      return {
+        complete: (msg) => {
+          if (activeAiProgressTimer) clearInterval(activeAiProgressTimer);
+          updateUi(100);
+          if (subEl) subEl.textContent = msg || 'Fertiggestellt!';
+        },
+        stop: () => {
+          if (activeAiProgressTimer) clearInterval(activeAiProgressTimer);
+          box.style.display = 'none';
+        }
+      };
+    }
+
+    async function handleFindSingleSong() {
+      const input = document.getElementById('aiSongSearchInput');
+      const query = (input?.value || '').trim();
+      const resultsWrapper = document.getElementById('aiResultsWrapper');
+      const btn = document.getElementById('aiFindSongBtn');
+
+      if (!query) {
+        showToast('Bitte Titel oder Interpret eingeben');
+        return;
+      }
+
+      const savedKey = await getActiveGeminiKey();
+      if (!savedKey) {
+        toggleApiKeyAccordion();
+        showToast('Bitte zuerst Gemini API Key eintragen 🔑');
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (resultsWrapper) resultsWrapper.style.display = 'none';
+
+      const progress = showAiProgress('🎯 Suche besten Song-Treffer…', `Recherchiere "${query}" mit Gemini AI…`);
+
+      try {
+        const promptText = `Du bist ein professioneller Musikexperte für Akustikgitarre, Lagerfeuer und Singkreis-Repertoire.
+Ermittle genau den 1 am besten passenden Song zu der Suchanfrage: "${query}".
+Ermittle den exakten Songtitel, den exakten Original-Künstler und das Erscheinungsjahr.
+Antworte AUSSCHLIESSLICH als valides JSON-Array mit genau 1 Objekt (ohne Markdown, ohne \`\`\`json Backticks):
+[
+  {"title": "Exakter Songtitel", "artist": "Exakter Künstler", "year": 1985}
+]`;
+
+        researchedSuggestions = await callGeminiFlashAPI(promptText, savedKey);
+        if (!Array.isArray(researchedSuggestions) || researchedSuggestions.length === 0) {
+          throw new Error('Kein passender Song gefunden.');
+        }
+
+        if (progress) progress.complete('✅ Passenden Song gefunden! Klicke unten zum Generieren:');
+        renderAiResultsList();
+
+      } catch (err) {
+        if (progress) progress.stop();
+        showToast('Fehler: ' + err.message);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function handleResearch10Songs() {
+      const input = document.getElementById('aiSongSearchInput');
+      const query = (input?.value || '').trim();
+      const resultsWrapper = document.getElementById('aiResultsWrapper');
+      const btn = document.getElementById('aiFindSongBtn');
+
+      if (!query) return;
+      const savedKey = await getActiveGeminiKey();
+      if (!savedKey) return;
+
+      if (btn) btn.disabled = true;
+      if (resultsWrapper) resultsWrapper.style.display = 'none';
+
+      const progress = showAiProgress('🔍 Suche 10 passende Lieder…', `Vorschläge für "${query}"…`);
+
+      try {
+        const promptText = `Du bist ein professioneller Musikexperte für Akustikgitarre, Lagerfeuer und Singkreis-Repertoire.
+Recherchiere genau 10 bekannte, beliebte und passende Songs zu der Suchanfrage: "${query}", die sich hervorragend für Akustikgitarre & Singkreise eignen.
+Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, ohne \`\`\`json Backticks):
+[
+  {"title": "Songtitel 1", "artist": "Künstler 1", "year": 1982}
+]`;
+
+        researchedSuggestions = await callGeminiFlashAPI(promptText, savedKey);
+        if (progress) progress.complete('✅ 10 Vorschläge gefunden:');
+        renderAiResultsList();
+
+      } catch (err) {
+        if (progress) progress.stop();
+        showToast('Fehler: ' + err.message);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function renderAiResultsList() {
+      const wrapper = document.getElementById('aiResultsWrapper');
+      const container = document.getElementById('aiResultsList');
+      const headerTitle = document.getElementById('aiResultsHeaderTitle');
+      if (!wrapper || !container) return;
+
+      wrapper.style.display = 'block';
+
+      if (researchedSuggestions.length === 1) {
+        const song = researchedSuggestions[0];
+        if (headerTitle) headerTitle.textContent = 'Top-Treffer gefunden · Tippen zum Generieren:';
+
+        container.innerHTML = `
+          <div onclick="generateSelectedSong(0)" style="padding:16px;border-radius:var(--radius-lg);background:var(--ink);border:1.5px solid var(--color-accent-500);cursor:pointer;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-md);" class="animate-scale-in">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:42px;height:42px;border-radius:var(--radius-full);background:rgba(214,127,72,0.18);color:var(--color-accent-400);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;">
+                🎯
+              </div>
+              <div style="min-width:0;flex:1;">
+                <div style="font-family:var(--font-heading);font-size:18px;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  ${escapeHtml(song.title)}
+                </div>
+                <div style="font-size:12.5px;color:var(--cream-dim);margin-top:2px;">
+                  ${escapeHtml(song.artist)} ${song.year ? '(' + song.year + ')' : ''}
+                </div>
+              </div>
+            </div>
+
+            <button type="button" style="width:100%;padding:12px;border-radius:var(--radius-full);background:var(--color-accent-500);color:var(--ink);font:700 13.5px/1 var(--font-body);display:flex;align-items:center;justify-content:center;gap:7px;">
+              <span>✨ Text & Akkorde jetzt generieren ↗</span>
+            </button>
+          </div>
+
+          <div style="padding-top:12px;display:flex;align-items:center;justify-content:space-between;font-size:12px;">
+            <span style="color:var(--cream-muted);">Nicht der richtige Song?</span>
+            <button onclick="handleResearch10Songs()" style="color:var(--color-accent-400);font-weight:700;">
+              🔍 10 alternative Songs suchen
+            </button>
+          </div>
+        `;
+      } else {
+        if (headerTitle) headerTitle.textContent = '10 Vorschläge · Wähle ein Lied:';
+        container.innerHTML = researchedSuggestions.map((song, idx) => `
+          <div onclick="generateSelectedSong(${idx})" style="padding:13px 15px;border-radius:var(--radius-lg);background:var(--ink);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;cursor:pointer;">
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:15px;font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                ${escapeHtml(song.title)}
+              </div>
+              <div style="font-size:12px;color:var(--cream-muted);margin-top:1px;">
+                ${escapeHtml(song.artist)} ${song.year ? '(' + song.year + ')' : ''}
+              </div>
+            </div>
+            <span style="padding:6px 14px;border-radius:var(--radius-full);background:rgba(214,127,72,0.18);color:var(--color-accent-400);font:700 12px/1 var(--font-body);flex:none;">
+              Generieren
+            </span>
+          </div>
+        `).join('');
+      }
+    }
+
+    async function generateSelectedSong(idx) {
+      const song = researchedSuggestions[idx];
+      if (!song) return;
+
+      const savedKey = await getActiveGeminiKey();
+      if (!savedKey) return;
+
+      const resultsWrapper = document.getElementById('aiResultsWrapper');
+      if (resultsWrapper) resultsWrapper.style.display = 'none';
+
+      const progress = showAiProgress('✨ Generiere vollständigen Song…', `Erstelle "${song.title}" (${song.artist})…`);
+
+      try {
+        const promptText = `Du bist ein professioneller Musikexperte für Akustikgitarre, Lagerfeuer und Singkreis-Repertoire.
+Erstelle für den Song "${song.title}" von "${song.artist}" den vollständigen Liedtext inklusive präziser Gitarren-Akkorde für Akustikgitarre.
+Ermittle dabei den echten Songtitel, den echten Original-Künstler und das Erscheinungsjahr.
+Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt (ohne Markdown, ohne \`\`\`json Backticks):
+{
+  "title": "Exakter Songtitel",
+  "artist": "Exakter Interpret / Urheber",
+  "year": ${song.year || 1990},
+  "lang": "DE",
+  "originalKey": "G",
+  "tempo": 85,
+  "message": "Kurze 1-Satz Kernaussage oder Stimmung auf Deutsch.",
+  "content": "[Strophe 1]\\nG           C\\nErste Textzeile...\\n\\n[Refrain]\\n..."
+}
+WICHTIG für "content":
+- Verwende Abschnitts-Tags wie [Strophe 1], [Refrain], [Strophe 2], [Brücke], [Outro].
+- Setze die Akkorde in eigene Zeilen DIREKT ÜBER die zugehörigen Textzeilen.
+- Verwende gängige Standard-Akkorde (z.B. G, Em, C, D, Am, F, A7, Cadd9, D/F#).
+- Der Text muss vollständig und singbar sein.`;
+
+        const generated = await callGeminiFlashAPI(promptText, savedKey);
+        if (!generated || !generated.title || !generated.content) {
+          throw new Error('Ungültiges Format erhalten.');
+        }
+
+        generated.id = 'comm-' + Date.now();
+        generated.isCommunity = true;
+        if (!generated.originalKey) generated.originalKey = 'G';
+        if (!generated.tempo) generated.tempo = 80;
+        if (!generated.lang) generated.lang = 'DE';
+
+        await saveCommunitySong(generated);
+
+        if (progress) progress.complete(`✅ "${generated.title}" hinzugefügt!`);
+        showToast(`"${generated.title}" hinzugefügt! 🎶`);
+
+        setTimeout(() => {
+          closeAiSheet();
+          renderSongList();
+          openSongModal(generated.id);
+        }, 600);
+
+      } catch (err) {
+        if (progress) progress.stop();
+        showToast('Fehler: ' + err.message);
+      }
+    }
+
+    async function saveCommunitySong(song) {
+      if (!communitySongs.some(s => s.id === song.id)) {
+        communitySongs.unshift(song);
+        localStorage.setItem('singkreis_community_songs', JSON.stringify(communitySongs));
+      }
+
+      // Sync to Firebase if active
+      if (isFirebaseActive && db) {
+        try {
+          await db.collection('community_songs').doc(song.id).set(song);
+        } catch (e) {
+          console.error('Firebase save error:', e);
+        }
+      }
+    }
+
+    function promptDeleteCommunitySong(id, title) {
+      deleteCandidateId = id;
+      const modal = document.getElementById('deleteConfirmModal');
+      const targetEl = document.getElementById('deleteTargetTitle');
+      if (targetEl) targetEl.textContent = title;
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeDeleteConfirmModal() {
+      deleteCandidateId = null;
+      const modal = document.getElementById('deleteConfirmModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function executeDeleteCommunitySong() {
+      if (!deleteCandidateId) return;
+      const id = deleteCandidateId;
+      communitySongs = communitySongs.filter(s => s.id !== id);
+      localStorage.setItem('singkreis_community_songs', JSON.stringify(communitySongs));
+
+      if (isFirebaseActive && db) {
+        try {
+          await db.collection('community_songs').doc(id).delete();
+        } catch (e) {
+          console.error('Firebase delete error:', e);
+        }
+      }
+
+      closeDeleteConfirmModal();
+      renderSongList();
+      showToast('Song gelöscht');
+    }
+
+    // ==================== 6. CLOUD SYNC (FIREBASE FIRESTORE) ====================
+    function openCloudSheet() {
+      const sheet = document.getElementById('cloudSheet');
+      const projInput = document.getElementById('fbProjectIdInput');
+      const keyInput = document.getElementById('fbApiKeyInput');
+
+      if (projInput) projInput.value = localStorage.getItem('singkreis_fb_project_id') || (typeof ENV_CONFIG !== 'undefined' ? ENV_CONFIG.FIREBASE_PROJECT_ID : '') || '';
+      if (keyInput) keyInput.value = localStorage.getItem('singkreis_fb_api_key') || (typeof ENV_CONFIG !== 'undefined' ? ENV_CONFIG.FIREBASE_API_KEY : '') || '';
+
+      updateCloudStatusUI();
+      if (sheet) sheet.style.display = 'flex';
+    }
+
+    function closeCloudSheet() {
+      const sheet = document.getElementById('cloudSheet');
+      if (sheet) sheet.style.display = 'none';
+    }
+
+    function initFirebaseFromStorage() {
+      const proj = (localStorage.getItem('singkreis_fb_project_id') || (typeof ENV_CONFIG !== 'undefined' ? ENV_CONFIG.FIREBASE_PROJECT_ID : '') || '').trim();
+      const key = (localStorage.getItem('singkreis_fb_api_key') || (typeof ENV_CONFIG !== 'undefined' ? ENV_CONFIG.FIREBASE_API_KEY : '') || '').trim();
+      if (proj && key) {
+        setupFirebase(proj, key);
+      } else {
+        updateCloudStatusUI();
+      }
+    }
+
+    function setupFirebase(projectId, apiKey) {
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp({ apiKey, projectId });
+        }
+        db = firebase.firestore();
+        isFirebaseActive = true;
+
+        if (unsubscribeFirestore) unsubscribeFirestore();
+        unsubscribeFirestore = db.collection('community_songs').onSnapshot(snapshot => {
+          let updated = false;
+          snapshot.docChanges().forEach(change => {
+            const data = change.doc.data();
+            data.id = change.doc.id;
+            data.isCommunity = true;
+
+            if (change.type === 'added' || change.type === 'modified') {
+              const idx = communitySongs.findIndex(s => s.id === data.id);
+              if (idx >= 0) {
+                communitySongs[idx] = data;
+              } else {
+                communitySongs.unshift(data);
+              }
+              updated = true;
+            }
+            if (change.type === 'removed') {
+              communitySongs = communitySongs.filter(s => s.id !== data.id);
+              updated = true;
+            }
+          });
+
+          if (updated) {
+            localStorage.setItem('singkreis_community_songs', JSON.stringify(communitySongs));
+            renderSongList();
+          }
+        }, err => {
+          console.error('Firestore listener error:', err);
+          isFirebaseActive = false;
+          updateCloudStatusUI();
+        });
+
+        updateCloudStatusUI();
+      } catch (err) {
+        console.error('Firebase setup failed:', err);
+        isFirebaseActive = false;
+        updateCloudStatusUI();
+      }
+    }
+
+    async function testFirebaseConnection() {
+      const proj = document.getElementById('fbProjectIdInput')?.value.trim();
+      const key = document.getElementById('fbApiKeyInput')?.value.trim();
+
+      if (!proj || !key) {
+        showToast('Bitte Project ID & API Key ausfüllen');
+        return;
+      }
+
+      showToast('Teste Verbindung…');
+      try {
+        setupFirebase(proj, key);
+        if (db) {
+          await db.collection('community_songs').limit(1).get();
+          showToast('✅ Verbindung erfolgreich hergestellt!');
+          isFirebaseActive = true;
+          updateCloudStatusUI();
+        }
+      } catch (e) {
+        showToast('❌ Fehler: ' + e.message);
+      }
+    }
+
+    function saveFirebaseConfig() {
+      const proj = document.getElementById('fbProjectIdInput')?.value.trim() || '';
+      const key = document.getElementById('fbApiKeyInput')?.value.trim() || '';
+
+      localStorage.setItem('singkreis_fb_project_id', proj);
+      localStorage.setItem('singkreis_fb_api_key', key);
+
+      if (proj && key) {
+        setupFirebase(proj, key);
+        showToast('Kreis-Sync gespeichert & aktiv');
+      } else {
+        isFirebaseActive = false;
+        showToast('Kreis-Sync deaktiviert');
+      }
+
+      closeCloudSheet();
+      updateCloudStatusUI();
+    }
+
+    function updateCloudStatusUI() {
+      const label = document.getElementById('cloudStatusLabel');
+      const dot = document.getElementById('cloudStatusDot');
+      const modalDot = document.getElementById('cloudModalDot');
+      const modalText = document.getElementById('cloudModalStatusText');
+
+      if (isFirebaseActive) {
+        if (label) label.textContent = 'Live';
+        if (dot) dot.style.background = 'var(--color-accent-2-400)';
+        if (modalDot) modalDot.style.background = 'var(--color-accent-2-400)';
+        if (modalText) modalText.textContent = 'Verbunden · Echtzeit-Sync aktiv';
+      } else {
+        if (label) label.textContent = 'Sync einrichten';
+        if (dot) dot.style.background = 'var(--color-accent-500)';
+        if (modalDot) modalDot.style.background = 'var(--cream-muted)';
+        if (modalText) modalText.textContent = 'Offline · lokal gespeichert';
+      }
+    }
+
+    // ==================== 7. LIGHTBOX & FULLSCREEN MODALS ====================
+    function openImageLightbox() {
+      const box = document.getElementById('imageLightbox');
+      if (box) box.style.display = 'flex';
+    }
+
+    function closeImageLightbox() {
+      const box = document.getElementById('imageLightbox');
+      if (box) box.style.display = 'none';
+    }
+
+    function openQrFullscreen() {
+      const box = document.getElementById('qrFullscreenModal');
+      if (box) box.style.display = 'flex';
+    }
+
+    function closeQrFullscreen() {
+      const box = document.getElementById('qrFullscreenModal');
+      if (box) box.style.display = 'none';
+    }
+
+    function openWakeLockModal() {
+      const modal = document.getElementById('wakeLockModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeWakeLockModal() {
+      const modal = document.getElementById('wakeLockModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function closeAllSheets() {
+      closeMantrasSheet();
+      closeAiSheet();
+      closeCloudSheet();
+      closeImageLightbox();
+      closeQrFullscreen();
+      closeWakeLockModal();
+      closeDeleteConfirmModal();
+    }
+
+    // ==================== 8. WAKE-LOCK API ====================
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockSentinel = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    }
+
+    function releaseWakeLock() {
+      try {
+        if (wakeLockSentinel) {
+          wakeLockSentinel.release();
+          wakeLockSentinel = null;
+        }
+      } catch (err) {}
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && document.getElementById('songModal')?.style.display === 'flex') {
+        requestWakeLock();
+      }
+    });
+
+    // Helper: Escape HTML
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
