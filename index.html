@@ -2908,18 +2908,25 @@
 
       // Rendere bis zu 250 Einträge für maximale Performance
       const displayItems = filteredMantras.slice(0, 250);
-      container.innerHTML = displayItems.map(item => `
-        <div class="p-3 sm:px-4 sm:py-3.5 bg-stone-950 border border-stone-800/80 hover:border-violet-500/40 rounded-xl flex items-center justify-between gap-3 transition">
-          <div class="min-w-0 flex-1">
-            <h3 class="text-sm sm:text-base font-black text-white truncate leading-snug">
-              ${escapeHtml(item.title)}
-            </h3>
-            <p class="text-xs text-stone-400 font-medium truncate mt-0.5">
-              ${escapeHtml(item.artist)}
-            </p>
+      container.innerHTML = displayItems.map(item => {
+        const safeTitle = escapeHtml(item.title).replace(/'/g, "\\'");
+        const safeArtist = escapeHtml(item.artist).replace(/'/g, "\\'");
+        return `
+          <div onclick="selectMantraToSearch('${safeTitle}', '${safeArtist}')" class="p-3 sm:px-4 sm:py-3.5 bg-stone-950 border border-stone-800/80 hover:border-amber-500/60 hover:bg-stone-900/80 rounded-xl flex items-center justify-between gap-3 transition cursor-pointer active:scale-[0.99] group">
+            <div class="min-w-0 flex-1">
+              <h3 class="text-sm sm:text-base font-black text-white truncate leading-snug group-hover:text-amber-300 transition">
+                ${escapeHtml(item.title)}
+              </h3>
+              <p class="text-xs text-stone-400 font-medium truncate mt-0.5">
+                ${escapeHtml(item.artist)}
+              </p>
+            </div>
+            <span class="text-xs text-amber-400 opacity-0 group-hover:opacity-100 transition shrink-0 font-bold flex items-center gap-1">
+              <span>Suchen</span> ➔
+            </span>
           </div>
-        </div>
-      `).join("");
+        `;
+      }).join("");
 
       if (filteredMantras.length > 250) {
         container.innerHTML += `
@@ -2928,6 +2935,18 @@
           </p>
         `;
       }
+    }
+
+    function selectMantraToSearch(title, artist) {
+      closeMantrasModal();
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) {
+        searchInput.value = title;
+        handleSearch(title);
+        searchInput.focus();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast(`Suche nach "${title}"`);
     }
 
 
