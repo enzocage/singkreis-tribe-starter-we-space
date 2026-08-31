@@ -3220,17 +3220,17 @@
       if (bright) {
         // Zunächst voll sichtbar (100% Deckkraft / 0% Transparenz)
         widget.style.opacity = "1";
-        // Nach exakt 2 Sekunden ohne User-Interaktion auf 80% Transparenz (20% Deckkraft) ausfaden
+        // Nach exakt 2 Sekunden ohne User-Interaktion auf 90% Transparenz (10% Deckkraft) ausfaden
         scrollSpeedWidgetTimer = setTimeout(() => {
           if (isAutoScrolling) {
-            widget.style.opacity = "0.20"; // 80% Transparenz
+            widget.style.opacity = "0.10"; // 90% Transparenz / 10% Deckkraft (fast unsichtbar)
           } else {
             widget.style.opacity = "0";
             widget.style.pointerEvents = "none";
           }
         }, 2000);
       } else {
-        widget.style.opacity = isAutoScrolling ? "0.20" : "0";
+        widget.style.opacity = isAutoScrolling ? "0.10" : "0";
         if (!isAutoScrolling) widget.style.pointerEvents = "none";
       }
     }
