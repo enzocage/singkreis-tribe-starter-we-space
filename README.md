@@ -2,7 +2,7 @@
 
 Ein moderner, interaktiver **digitaler Notenständer & Songbook** für Singkreise, Lagerfeuer-Abende, Chöre, Hauskreise und We-Space-Gruppen.
 
-Mit über **200 beliebten Pop-, Rock-, Folk- & Lagerfeuer-Klassikern**, **673 Mantren & heilsamen Liedern**, integrierter **Google Gemini AI** für automatisches Generieren neuer Songs und **Echtzeit-Synchronisation via Google Firebase Firestore**.
+Mit über **220 beliebten Pop-, Rock-, Folk- & Lagerfeuer-Klassikern**, **25 vollständig akkordierten Kirtan- & Mitsing-Mantren**, **673 Mantren & heilsamen Liedern**, integrierter **Google Gemini AI** für automatisches Generieren neuer Songs und **Echtzeit-Synchronisation via Google Firebase Firestore**.
 
 ---
 
