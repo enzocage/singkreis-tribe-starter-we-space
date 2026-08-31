@@ -18,109 +18,109 @@ const tribestarterWonderwall = {
   "tempo": 87,
   "popularity": 100,
   "category": "lagerfeuer",
-  "message": "Die offizielle Tribe Starter Singkreis-Hymne: Mate, WeSpace-Vibes, Lagerfeuer und Schrammel-Gitarre auf Platz 1!",
+  "message": "Die offizielle Tribe Starter Singkreis-Hymne: Die Axt im Schädel, Mate, WeSpace-Vibes und Schrammel-Gitarre auf Platz 1!",
   "content": `
 [Strophe 1]
 Em7                   G
-Heute sitzen wir am Feuer,
-                  Dsus4               A7sus4
-Tribestarter stimmt die Saiten an,
-Em7                G
-Im WeSpace trinken alle Mate,
-        Dsus4              A7sus4
-keiner weiß, was er noch labern kann.
+Tribe-star-ter: Heu-te ist der Tag,
+                 Dsus4               A7sus4
+wo die Axt mir tief im Schä-del steckt,
+Em7                 G
+We-Space, und kei-ner zieht mir
+           Dsus4               A7sus4
+die-ses Beil aus dem Hirn he-raus,
 Em7                  G           Dsus4               A7sus4
-Ich glaub kaum noch, dass irgendwer 'ne Axt im Schädel spürt
-             Cadd9   Dsus4   A7sus4
-so wie ich jetzt hier.
+Ich glaub' nicht dran, dass ir-gend-wer hier merkt,
+                                 Cadd9   Dsus4   A7sus4
+wie die-ses Beil im Schä-del pocht.
 
 [Strophe 2]
 Em7                 G
-Funken fliegen durch die Runde,
-          Dsus4                 A7sus4
-jeder singt den gleichen Schrammel-Akkord,
+Hack-beil, das Wort stand auf der Stirn,
+             Dsus4                 A7sus4
+dass das Feu-er mir den Kopf ein-haut,
 Em7                 G
-Wir chillen kollektiv im WeSpace,
-         Dsus4                A7sus4
-doch die Logik ging schon lange fort.
+Ein Schor-le-bier tat not vor-her,
+        Dsus4                 A7sus4
+a-ber nie-mand rief 'nen Dok-tor an.
 Em7                  G           Dsus4               A7sus4
-Ich glaub kaum noch, dass irgendwer 'ne Axt im Schädel spürt
-             Em7   G   Dsus4   A7sus4
-so wie ich jetzt hier.
+Ich glaub' nicht dran, dass ir-gend-wer hier merkt,
+                                 Em7   G   Dsus4   A7sus4
+wie die-ses Beil im Schä-del pocht.
 
-[Pre-Chorus]
+[Pre-Chorus 1]
       Cadd9             Dsus4             Em7
-Und all der Rauch zieht beißend in die Augen,
+Und all die Ro-he-heit im Kopf tut schwin-den,
       Cadd9             Dsus4             Em7
-Die alten Griffe wollen nix mehr taugen.
+Und all das Leid am Beil tat weh beim Fin-den.
 Cadd9              Dsus4
-Ich wollt' dir sagen: „Zieh das Beil mal
-G         D/F#     Em7       D        A7sus4
-endlich aus meim Hirn!“, doch mir fällt's nicht mehr ein...
+Da sind man-che Din-ge, die der
+G        D/F#     Em7       D        A7sus4
+Dok-tor nä-hen soll, doch er weiß nicht wie...
 
-[Refrain]
+[Chorus 1]
        Cadd9      Dsus4      Em7
-Denn heute...
+Be-zahlt mein Beil...
               Cadd9    Dsus4    Em7
-Gibt's Lagerfeuer für die Meute!
+Ju-ra-be-gabt zieht ei-ner's Beil raus?
        Cadd9      Dsus4      Em7
-Und scheißegal:
+Ein Arz-te-fall...
            Cadd9    Dsus4    Em7
-Die Axt im Kopf ist phänomenal!
+Trotz der Wun-de voll!
 
 [Strophe 3]
 Em7                   G
-Heute sitzen wir am Feuer,
+Tribe-star-ter, heu-te tut es weh,
                   Dsus4               A7sus4
-Tribestarter stimmt die Saiten an,
+und das Pflas-ter klebt am Hirn nicht fest,
 Em7                G
-Im WeSpace trinken alle Mate,
-        Dsus4              A7sus4
-keiner weiß, was er noch labern kann.
+We-Space, man fragt mich wie es geht,
+        Dsus4                 A7sus4
+wäh-rend je-der mich am Feu-er lässt.
 Em7                  G           Dsus4               A7sus4
-Ich glaub kaum noch, dass irgendwer 'ne Axt im Schädel spürt
-             Cadd9   Dsus4   A7sus4
-so wie ich jetzt hier.
+Ich glaub' nicht dran, dass ir-gend-wer hier merkt,
+                                 Cadd9   Dsus4   A7sus4
+wie die-ses Beil im Schä-del pocht.
 
-[Pre-Chorus]
+[Pre-Chorus 2]
       Cadd9             Dsus4             Em7
-Und all der Rauch zieht beißend in die Augen,
+Und all die Ro-he-heit im Kopf tut schwin-den,
       Cadd9             Dsus4             Em7
-Die alten Griffe wollen nix mehr taugen.
+Und all das Leid am Beil tat weh beim Fin-den.
 Cadd9              Dsus4
-Ich wollt' dir sagen: „Zieh das Beil mal
-G         D/F#     Em7       D        A7sus4
-endlich aus meim Hirn!“, doch mir fällt's nicht mehr ein...
+Da sind man-che Din-ge, die der
+G        D/F#     Em7       D        A7sus4
+Dok-tor nä-hen soll, doch er weiß nicht wie...
 
-[Refrain]
+[Chorus 2]
        Cadd9      Dsus4      Em7
-Denn heute...
+Ich sag: Mein Beil...
               Cadd9    Dsus4    Em7
-Gibt's Lagerfeuer für die Meute!
+Ju-ra-be-gabt zieht ei-ner's Beil raus?
        Cadd9      Dsus4      Em7
-Und scheißegal:
+Ein Arz-te-fall...
            Cadd9    Dsus4    Em7
-Die Axt im Kopf ist phänomenal!
+Trotz der Wun-de voll!
+
+[Chorus 3]
        Cadd9      Dsus4      Em7
-Ich sag: Heute...
+Ich sag: Mein Beil...
               Cadd9    Dsus4    Em7
-Gibt's Lagerfeuer für die Meute!
+Ju-ra-be-gabt zieht ei-ner's Beil raus?
        Cadd9      Dsus4      Em7
-Und scheißegal:
+Ein Arz-te-fall...
            Cadd9    Dsus4    Em7
-Die Axt im Kopf ist phänomenal!
+Trotz der Wun-de voll!
 
 [Outro]
        Cadd9      Dsus4      Em7
-Ich sag: Heute...
-              Cadd9    Dsus4    Em7
-Gibt's Lagerfeuer für die Meute!
+Ich sag: Mein Beil... (Zieht ei-ner's Beil raus?)
            Cadd9    Dsus4    Em7
-Die Axt im Kopf ist phänomenal...
+Ein Arz-te-fall... (Trotz der Wun-de voll!)
            Cadd9    Dsus4    Em7
-Die Axt im Kopf ist phänomenal...
+Mein Beil... (Zieht ei-ner's Beil raus?)
            Cadd9    Dsus4    Em7
-Die Axt im Kopf ist phänomenal!
+Ein Arz-te-fall... (Trotz der Wun-de voll!)
 `
 };
 
@@ -135,4 +135,4 @@ if (existingIdx !== -1) {
 const newSongsCode = 'const songs = ' + JSON.stringify(songs, null, 2) + ';';
 const updatedScript = dbScript.replace(match[0], newSongsCode);
 fs.writeFileSync(dbPath, updatedScript, 'utf8');
-console.log('Successfully updated build_songs_database.js with full length Wonderwall parody!');
+console.log('Successfully updated build_songs_database.js with new text for Tribe Starter Wonderwall!');
