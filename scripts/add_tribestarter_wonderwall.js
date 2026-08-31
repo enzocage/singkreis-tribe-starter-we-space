@@ -19,22 +19,120 @@ const tribestarterWonderwall = {
   "popularity": 100,
   "category": "lagerfeuer",
   "message": "Die offizielle Tribe Starter Singkreis-Hymne: Mate, WeSpace-Vibes, Lagerfeuer und Schrammel-Gitarre auf Platz 1!",
-  "content": "\n[Strophe 1]\nEm7                   G\nHeute sitzen wir am Feuer,\n                  Dsus4               A7sus4\nTribestarter stimmt die Saiten an,\nEm7                G\nIm WeSpace trinken alle Mate,\n        Dsus4              A7sus4\nkeiner weiß, was er noch labern kann.\nEm7                  G           Dsus4               A7sus4\nIch glaub kaum noch, dass irgendwer 'ne Axt im Schädel spürt\n             Cadd9   Dsus4   A7sus4\nso wie ich jetzt hier.\n\n[Strophe 2]\nEm7                 G\nFunken fliegen durch die Runde,\n          Dsus4                 A7sus4\njeder singt den gleichen Schrammel-Akkord,\nEm7                 G\nWir chillen kollektiv im WeSpace,\n         Dsus4                A7sus4\ndoch die Logik ging schon lange fort.\nEm7                  G           Dsus4               A7sus4\nIch glaub kaum noch, dass irgendwer 'ne Axt im Schädel spürt\n             Em7   G   Dsus4   A7sus4\nso wie ich jetzt hier.\n\n[Pre-Chorus]\n      Cadd9             Dsus4             Em7\nUnd all der Rauch zieht beißend in die Augen,\n      Cadd9             Dsus4             Em7\nDie alten Griffe wollen nix mehr taugen.\nCadd9              Dsus4\nIch wollt' dir sagen: „Zieh das Beil mal\nG         D/F#     Em7       D        A7sus4\nendlich aus meim Hirn!“, doch mir fällt's nicht mehr ein...\n\n[Refrain]\n       Cadd9      Dsus4      Em7\nDenn heute...\n              Cadd9    Dsus4    Em7\nGibt's Lagerfeuer für die Meute!\n       Cadd9      Dsus4      Em7\nUnd scheißegal:\n           Cadd9    Dsus4    Em7\nDie Axt im Kopf ist phänomenal!\n\n[Outro]\n       Cadd9      Dsus4      Em7\nDenn heute...\n              Cadd9    Dsus4    Em7\nGibt's Lagerfeuer für die Meute!\n           Cadd9    Dsus4    Em7\nDie Axt im Kopf ist phänomenal!\n"
+  "content": `
+[Strophe 1]
+Em7                   G
+Heute sitzen wir am Feuer,
+                  Dsus4               A7sus4
+Tribestarter stimmt die Saiten an,
+Em7                G
+Im WeSpace trinken alle Mate,
+        Dsus4              A7sus4
+keiner weiß, was er noch labern kann.
+Em7                  G           Dsus4               A7sus4
+Ich glaub kaum noch, dass irgendwer 'ne Axt im Schädel spürt
+             Cadd9   Dsus4   A7sus4
+so wie ich jetzt hier.
+
+[Strophe 2]
+Em7                 G
+Funken fliegen durch die Runde,
+          Dsus4                 A7sus4
+jeder singt den gleichen Schrammel-Akkord,
+Em7                 G
+Wir chillen kollektiv im WeSpace,
+         Dsus4                A7sus4
+doch die Logik ging schon lange fort.
+Em7                  G           Dsus4               A7sus4
+Ich glaub kaum noch, dass irgendwer 'ne Axt im Schädel spürt
+             Em7   G   Dsus4   A7sus4
+so wie ich jetzt hier.
+
+[Pre-Chorus]
+      Cadd9             Dsus4             Em7
+Und all der Rauch zieht beißend in die Augen,
+      Cadd9             Dsus4             Em7
+Die alten Griffe wollen nix mehr taugen.
+Cadd9              Dsus4
+Ich wollt' dir sagen: „Zieh das Beil mal
+G         D/F#     Em7       D        A7sus4
+endlich aus meim Hirn!“, doch mir fällt's nicht mehr ein...
+
+[Refrain]
+       Cadd9      Dsus4      Em7
+Denn heute...
+              Cadd9    Dsus4    Em7
+Gibt's Lagerfeuer für die Meute!
+       Cadd9      Dsus4      Em7
+Und scheißegal:
+           Cadd9    Dsus4    Em7
+Die Axt im Kopf ist phänomenal!
+
+[Strophe 3]
+Em7                   G
+Heute sitzen wir am Feuer,
+                  Dsus4               A7sus4
+Tribestarter stimmt die Saiten an,
+Em7                G
+Im WeSpace trinken alle Mate,
+        Dsus4              A7sus4
+keiner weiß, was er noch labern kann.
+Em7                  G           Dsus4               A7sus4
+Ich glaub kaum noch, dass irgendwer 'ne Axt im Schädel spürt
+             Cadd9   Dsus4   A7sus4
+so wie ich jetzt hier.
+
+[Pre-Chorus]
+      Cadd9             Dsus4             Em7
+Und all der Rauch zieht beißend in die Augen,
+      Cadd9             Dsus4             Em7
+Die alten Griffe wollen nix mehr taugen.
+Cadd9              Dsus4
+Ich wollt' dir sagen: „Zieh das Beil mal
+G         D/F#     Em7       D        A7sus4
+endlich aus meim Hirn!“, doch mir fällt's nicht mehr ein...
+
+[Refrain]
+       Cadd9      Dsus4      Em7
+Denn heute...
+              Cadd9    Dsus4    Em7
+Gibt's Lagerfeuer für die Meute!
+       Cadd9      Dsus4      Em7
+Und scheißegal:
+           Cadd9    Dsus4    Em7
+Die Axt im Kopf ist phänomenal!
+       Cadd9      Dsus4      Em7
+Ich sag: Heute...
+              Cadd9    Dsus4    Em7
+Gibt's Lagerfeuer für die Meute!
+       Cadd9      Dsus4      Em7
+Und scheißegal:
+           Cadd9    Dsus4    Em7
+Die Axt im Kopf ist phänomenal!
+
+[Outro]
+       Cadd9      Dsus4      Em7
+Ich sag: Heute...
+              Cadd9    Dsus4    Em7
+Gibt's Lagerfeuer für die Meute!
+           Cadd9    Dsus4    Em7
+Die Axt im Kopf ist phänomenal...
+           Cadd9    Dsus4    Em7
+Die Axt im Kopf ist phänomenal...
+           Cadd9    Dsus4    Em7
+Die Axt im Kopf ist phänomenal!
+`
 };
 
-// Check if already exists, otherwise prepend / add
 const existingIdx = songs.findIndex(s => s.id === tribestarterWonderwall.id);
 if (existingIdx !== -1) {
   songs[existingIdx] = tribestarterWonderwall;
 } else {
-  // Add at the beginning of array so it also leads structurally
   songs.unshift(tribestarterWonderwall);
 }
-
-console.log(`Total songs count: ${songs.length}. Platz 1 is: ${songs[0].title} with popularity ${songs[0].popularity}`);
 
 // Write back to build_songs_database.js
 const newSongsCode = 'const songs = ' + JSON.stringify(songs, null, 2) + ';';
 const updatedScript = dbScript.replace(match[0], newSongsCode);
 fs.writeFileSync(dbPath, updatedScript, 'utf8');
-console.log('Successfully updated build_songs_database.js with Tribe Starter Wonderwall on Platz 1!');
+console.log('Successfully updated build_songs_database.js with full length Wonderwall parody!');
