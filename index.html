@@ -3302,7 +3302,7 @@
       if (pctText) pctText.textContent = `${p}%`;
     }
 
-    // Direkt einen einzelnen Song mit AI generieren und öffnen
+    // Schritt 1: Einen einzelnen Song mit AI recherchieren & als Top-Treffer anzeigen
     async function handleFindSingleSong() {
       const query = (document.getElementById("newSongSearchQuery")?.value || "").trim();
       const apiKeyInput = document.getElementById("geminiApiKey")?.value?.trim();
@@ -3340,14 +3340,60 @@
       singleBtn.disabled = true;
       if (search10Btn) search10Btn.disabled = true;
       spinner.classList.remove("hidden");
-      btnText.textContent = "Generiere Song...";
+      btnText.textContent = "Recherchiere Song...";
       if (suggestionsWrapper) suggestionsWrapper.classList.add("hidden");
 
-      // Auffälligen Fortschrittsbalken starten
-      const progress = showAiProgressBar("✨ Generiere Song & Gitarrenakkorde...", `Erstelle "${query}" mit Gemini AI...`);
+      // Fortschrittsbalken für Recherche
+      const progress = showAiProgressBar("🎯 Suche besten Song-Treffer...", `Recherchiere "${query}" mit Gemini AI...`);
 
       try {
-        const createdSong = await generateSingleSongByAI(query, "", new Date().getFullYear(), savedKey);
+        const promptText = `Du bist ein professioneller Musikexperte für Akustikgitarre, Lagerfeuer und Singkreis-Repertoire.
+Ermittle genau den 1 am besten passenden Song zu der Suchanfrage: "${query}".
+Ermittle den exakten Songtitel, den exakten Original-Künstler und das Erscheinungsjahr.
+Antworte AUSSCHLIESSLICH als valides JSON-Array mit genau 1 Objekt (ohne Markdown, ohne \`\`\`json Backticks):
+[
+  {"title": "Exakter Songtitel", "artist": "Exakter Künstler", "year": 1985}
+]`;
+
+        researchedSuggestions = await callGeminiFlashAPI(promptText, savedKey);
+
+        if (!Array.isArray(researchedSuggestions) || researchedSuggestions.length === 0) {
+          throw new Error("Kein passender Song gefunden.");
+        }
+
+        if (progress) progress.complete("✅ Passenden Song gefunden! Klicke unten, um Text & Akkorde zu generieren:");
+
+        renderSuggestionsList();
+        suggestionsWrapper.classList.remove("hidden");
+
+      } catch (err) {
+        if (progress) progress.stop();
+        statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-rose-950/70 border-rose-500 text-rose-200 block";
+        statusBox.innerHTML = `<span>❌ Fehler bei der Song-Suche: ${escapeHtml(err.message)}</span>`;
+      } finally {
+        singleBtn.disabled = false;
+        if (search10Btn) search10Btn.disabled = false;
+        spinner.classList.add("hidden");
+        btnText.textContent = "🎯 Song finden";
+      }
+    }
+
+    // Schritt 2: Auf Klick den ausgewählten Song vollständig mit Text & Akkorden generieren
+    async function generateSingleSuggestedSong(idx) {
+      const song = researchedSuggestions[idx];
+      if (!song) return;
+
+      const savedKey = await getActiveGeminiKey();
+      if (!savedKey) return;
+
+      const statusBox = document.getElementById("aiStatusBox");
+      const suggestionsWrapper = document.getElementById("suggestionsWrapper");
+      if (suggestionsWrapper) suggestionsWrapper.classList.add("hidden");
+
+      const progress = showAiProgressBar("✨ Generiere Song & Gitarrenakkorde...", `Erstelle "${song.title}" (${song.artist})...`);
+
+      try {
+        const createdSong = await generateSingleSongByAI(song.title, song.artist, song.year, savedKey);
         await saveCommunitySong(createdSong);
 
         if (progress) progress.complete(`✅ "${createdSong.title}" (${createdSong.artist}) erfolgreich erstellt!`);
@@ -3364,11 +3410,6 @@
         if (progress) progress.stop();
         statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-rose-950/70 border-rose-500 text-rose-200 block";
         statusBox.innerHTML = `<span>❌ Fehler bei der Song-Erstellung: ${escapeHtml(err.message)}</span>`;
-      } finally {
-        singleBtn.disabled = false;
-        if (search10Btn) search10Btn.disabled = false;
-        spinner.classList.add("hidden");
-        btnText.textContent = "🎯 Song finden";
       }
     }
 
@@ -3498,19 +3539,58 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
 
     function renderSuggestionsList() {
       const container = document.getElementById("suggestionsList");
+      const wrapper = document.getElementById("suggestionsWrapper");
+      const batchFooter = wrapper?.querySelector(".pt-3.border-t");
+      const headerTitle = wrapper?.querySelector("p.text-xs.font-black");
+      const headerControls = wrapper?.querySelector(".flex.items-center.gap-2.text-\\[11px\\]");
       if (!container) return;
 
-      container.innerHTML = researchedSuggestions.map((song, idx) => `
-        <label class="flex items-center gap-3 p-2.5 bg-stone-950/80 hover:bg-stone-950 border border-stone-800 hover:border-amber-500/60 rounded-xl cursor-pointer transition select-none">
-          <input type="checkbox" data-idx="${idx}" class="suggestion-checkbox w-4 h-4 rounded text-amber-500 bg-stone-900 border-stone-700 focus:ring-amber-500 cursor-pointer" onchange="updateSelectedSuggestionsCount()">
-          <div class="min-w-0 flex-1">
-            <p class="text-sm font-bold text-white leading-tight truncate">${escapeHtml(song.title)}</p>
-            <p class="text-xs text-stone-400 truncate">${escapeHtml(song.artist)} ${song.year ? `(${song.year})` : ''}</p>
-          </div>
-        </label>
-      `).join("");
+      if (researchedSuggestions.length === 1) {
+        // Einzelner gefundener Song Treffer
+        if (headerTitle) headerTitle.textContent = "Passender Song gefunden:";
+        if (headerControls) headerControls.classList.add("hidden");
+        if (batchFooter) batchFooter.classList.add("hidden");
 
-      updateSelectedSuggestionsCount();
+        const song = researchedSuggestions[0];
+        container.innerHTML = `
+          <div onclick="generateSingleSuggestedSong(0)" class="p-4 bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950 border-2 border-emerald-500/70 hover:border-emerald-400 rounded-2xl shadow-xl space-y-3 cursor-pointer transition active:scale-[0.99] group">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-black flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition">
+                🎯
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 uppercase tracking-wider">Top-Treffer</span>
+                <h4 class="text-base sm:text-lg font-black text-white truncate leading-tight mt-1">${escapeHtml(song.title)}</h4>
+                <p class="text-xs text-stone-300 font-semibold truncate mt-0.5">${escapeHtml(song.artist)} ${song.year ? `(${song.year})` : ''}</p>
+              </div>
+            </div>
+            
+            <button type="button" onclick="event.stopPropagation(); generateSingleSuggestedSong(0)" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-stone-950 font-black rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg active:scale-95 transition">
+              <span>✨ Diesen Song jetzt generieren & öffnen ↗</span>
+            </button>
+          </div>
+        `;
+      } else {
+        // 10 Songs Recherche
+        if (headerTitle) headerTitle.textContent = "Gefundene Titel (Mehrfachauswahl möglich):";
+        if (headerControls) headerControls.classList.remove("hidden");
+        if (batchFooter) batchFooter.classList.remove("hidden");
+
+        container.innerHTML = researchedSuggestions.map((song, idx) => `
+          <label class="flex items-center gap-3 p-2.5 bg-stone-950/80 hover:bg-stone-950 border border-stone-800 hover:border-amber-500/60 rounded-xl cursor-pointer transition select-none">
+            <input type="checkbox" data-idx="${idx}" class="suggestion-checkbox w-4 h-4 rounded text-amber-500 bg-stone-900 border-stone-700 focus:ring-amber-500 cursor-pointer" onchange="updateSelectedSuggestionsCount()">
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-bold text-white leading-tight truncate">${escapeHtml(song.title)}</p>
+              <p class="text-xs text-stone-400 truncate">${escapeHtml(song.artist)} ${song.year ? `(${song.year})` : ''}</p>
+            </div>
+            <button type="button" onclick="event.preventDefault(); generateSingleSuggestedSong(${idx})" class="px-2.5 py-1 bg-stone-900 hover:bg-amber-500 hover:text-stone-950 border border-stone-700 text-amber-400 text-[11px] font-bold rounded-lg transition shrink-0" title="Nur diesen Song direkt generieren">
+              Generieren ↗
+            </button>
+          </label>
+        `).join("");
+
+        updateSelectedSuggestionsCount();
+      }
     }
 
     function selectAllSuggestions(checked) {
