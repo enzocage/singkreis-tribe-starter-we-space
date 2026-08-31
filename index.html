@@ -2860,8 +2860,13 @@
     let isProgrammaticScroll = false;
 
     function toggleAutoScroll() {
-      if (isAutoScrolling) stopAutoScroll();
-      else startAutoScroll();
+      if (isAutoScrolling) {
+        stopAutoScroll();
+        showToast("Auto-Scroll pausiert ▶");
+      } else {
+        startAutoScroll();
+        showToast("Auto-Scroll aktiv (Doppeltipp zum Pausieren) ⏸");
+      }
     }
 
     function startAutoScroll() {
@@ -2880,6 +2885,7 @@
       lastScrollTime = performance.now();
       scrollSubPixelAcc = 0;
 
+      // Zunächst voll sichtbar, dimmt sich nach 2s automatisch auf 20%
       showScrollSpeedWidget(true);
 
       function stepScroll(now) {
@@ -2992,7 +2998,7 @@
       const scrollArea = document.getElementById("modalScrollArea");
       if (!scrollArea) return;
 
-      // Nur bei ECHTEM manuellem Scrollen durch den User aktivieren (nicht beim programmatischen Auto-Scroll)
+      // 1. Manuelles Nachscrollen durch den User aktiviert das Tempo-Widget
       scrollArea.addEventListener("scroll", () => {
         if (!isAutoScrolling || isProgrammaticScroll) return;
         showScrollSpeedWidget(true);
@@ -3007,6 +3013,35 @@
         if (!isAutoScrolling || e.touches.length > 1) return;
         showScrollSpeedWidget(true);
       }, { passive: true });
+
+      // 2. Double-Click auf den Liedtext startet/stoppt Scrollen (Desktop)
+      scrollArea.addEventListener("dblclick", (e) => {
+        if (e.target.closest("button") || e.target.closest("a") || e.target.closest("#scrollSpeedWidget") || e.target.closest("#songControlBar")) return;
+        toggleAutoScroll();
+      });
+
+      // 3. Double-Tap auf den Liedtext startet/stoppt Scrollen (Smartphones / Tablets)
+      let lastTouchTapTime = 0;
+      let lastTouchTapPos = { x: 0, y: 0 };
+
+      scrollArea.addEventListener("touchend", (e) => {
+        if (e.changedTouches.length !== 1 || e.target.closest("button") || e.target.closest("a") || e.target.closest("#scrollSpeedWidget") || e.target.closest("#songControlBar")) return;
+
+        const now = Date.now();
+        const touch = e.changedTouches[0];
+        const timeDiff = now - lastTouchTapTime;
+        const distDiff = Math.hypot(touch.clientX - lastTouchTapPos.x, touch.clientY - lastTouchTapPos.y);
+
+        if (timeDiff > 40 && timeDiff < 320 && distDiff < 30) {
+          // Double-Tap erkannt!
+          lastTouchTapTime = 0;
+          e.preventDefault();
+          toggleAutoScroll();
+        } else {
+          lastTouchTapTime = now;
+          lastTouchTapPos = { x: touch.clientX, y: touch.clientY };
+        }
+      }, { passive: false });
     }
 
     // ==================== METRONOM ====================

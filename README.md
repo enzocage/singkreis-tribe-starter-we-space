@@ -35,7 +35,8 @@ Scanne den QR-Code mit deinem Smartphone, um die Singkreis-App sofort im mobilen
 * **Pinch-to-Zoom (2-Finger-Geste):** Verändere die Textgröße stufenlos & intuitiv mit zwei Fingern direkt auf dem Touchscreen (oder via `Strg + Mausrad` am Desktop).
 * **Erweiterter Textgrößen-Bereich (10px bis 76px):** Um 100% nach unten und oben erweitert – perfekt für riesige Bühnen-Displays oder kompakte Übersichten.
 * **Echtzeit-Transponieren (Ton +/-):** Ändere die Tonart mit einem Klick in Halbtonschritten. Alle Akkorde passen sich sofort mathematisch präzise an.
-* **Intelligenter Auto-Scroll mit Tempo-Widget:** Fließendes, freihändiges Mitlesen beim Musizieren mit frei wählbarem Tempo von `0.2x` bis zu maximal `10.0x` (zehnfach).
+* **Intelligenter Auto-Scroll mit Gestensteuerung:** Fließendes, freihändiges Mitlesen beim Musizieren. Starte oder stoppe das Scrollen blitzschnell mit **Double-Tap / Doppelklick** auf den Songtext.
+* **Dezentes Tempo-Widget (80% transparent):** Frei wählbares Tempo von `0.2x` bis zu maximal `10.0x`. Das Widget dimmt sich nach 2 Sekunden automatisch auf 80% Transparenz herunter.
 * **Akkorde Ein/Aus:** Für reine Mitsänger können Akkorde ausgeblendet werden, um den Liedtext kompakt anzuzeigen.
 * **Akkord-Diagramme / Badges:** Übersicht aller im Song verwendeten Griffe am Ende jedes Liedes.
 * **Dark / Light Mode & Druckansicht:** Kontrastreicher Bühnen-Dunkelmodus und saubere Druckansicht (`Ctrl+P`).
