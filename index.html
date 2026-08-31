@@ -201,25 +201,19 @@
           <p class="text-[11px] text-stone-500 mt-1">Gib einen Songtitel, Künstler / Band oder ein Schlagwort ein.</p>
         </div>
 
-        <!-- Buttons: Song finden & 10 Songs recherchieren -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-stone-800">
+        <!-- Buttons: Song finden -->
+        <div class="flex items-center justify-between gap-2 pt-3 border-t border-stone-800">
           <button type="button" onclick="toggleApiKeyAccordion()" class="text-[11px] text-stone-500 hover:text-amber-400 font-medium flex items-center gap-1.5 transition py-1" title="API Key Einstellungen">
             <span>🔑</span>
             <span class="hover:underline">API Key</span>
             <span id="apiKeyActivePill" class="hidden text-[9px] bg-emerald-950 text-emerald-400 border border-emerald-500/40 px-1 py-0.2 rounded font-bold">• Aktiv</span>
           </button>
 
-          <div class="flex items-center gap-2 flex-wrap">
-            <!-- Button 1: Song finden (sucht nur einen song direkt) -->
-            <button type="button" id="findSingleSongBtn" onclick="handleFindSingleSong()" class="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-stone-950 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition">
+          <div class="flex items-center gap-2">
+            <!-- Button: Song finden -->
+            <button type="button" id="findSingleSongBtn" onclick="handleFindSingleSong()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-stone-950 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition">
               <span id="singleSpinner" class="hidden animate-spin">🔄</span>
               <span id="singleBtnText">🎯 Song finden</span>
-            </button>
-
-            <!-- Button 2: 10 Songs recherchieren -->
-            <button type="button" id="search10Btn" onclick="handleResearch10Songs(event)" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition">
-              <span id="search10Spinner" class="hidden animate-spin">🔄</span>
-              <span id="search10BtnText">🔍 10 Songs recherchieren</span>
             </button>
           </div>
         </div>
@@ -3368,11 +3362,16 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit genau 1 Objekt (ohne Markdow
 
       } catch (err) {
         if (progress) progress.stop();
-        statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-rose-950/70 border-rose-500 text-rose-200 block";
-        statusBox.innerHTML = `<span>❌ Fehler bei der Song-Suche: ${escapeHtml(err.message)}</span>`;
+        statusBox.className = "p-3.5 rounded-xl text-xs font-medium border bg-rose-950/70 border-rose-500 text-rose-200 block space-y-2";
+        statusBox.innerHTML = `
+          <p class="font-bold text-white">❌ Kein passender Einzeltitel gefunden: ${escapeHtml(err.message)}</p>
+          <p class="text-[11px] text-rose-200">Möchtest du eine breitere Recherche nach 10 Titeln durchführen?</p>
+          <button type="button" onclick="handleResearch10Songs(event)" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black rounded-xl text-xs inline-flex items-center gap-1.5 shadow transition active:scale-95">
+            🔍 10 Songs recherchieren
+          </button>
+        `;
       } finally {
         singleBtn.disabled = false;
-        if (search10Btn) search10Btn.disabled = false;
         spinner.classList.add("hidden");
         btnText.textContent = "🎯 Song finden";
       }
@@ -3469,9 +3468,6 @@ WICHTIG für "content":
 
       const statusBox = document.getElementById("aiStatusBox");
       const singleBtn = document.getElementById("findSingleSongBtn");
-      const searchBtn = document.getElementById("search10Btn");
-      const spinner = document.getElementById("search10Spinner");
-      const btnText = document.getElementById("search10BtnText");
       const suggestionsWrapper = document.getElementById("suggestionsWrapper");
 
       if (!savedKey) {
@@ -3487,11 +3483,8 @@ WICHTIG für "content":
         return;
       }
 
-      searchBtn.disabled = true;
       if (singleBtn) singleBtn.disabled = true;
-      spinner.classList.remove("hidden");
-      btnText.textContent = "Recherchiere 10 Songs...";
-      suggestionsWrapper.classList.add("hidden");
+      if (suggestionsWrapper) suggestionsWrapper.classList.add("hidden");
 
       const progress = showAiProgressBar("🔍 Recherche nach 10 passenden Songs...", `Suche Vorschläge für "${query}"...`);
 
@@ -3510,7 +3503,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
           throw new Error("Ungültiges Listenformat von Gemini erhalten.");
         }
 
-        if (progress) progress.complete("✅ 10 passende Songs gefunden! Wähle unten deine gewünschten Songs aus:");
+        if (progress) progress.complete("✅ 10 passende Songs gefunden! Wähle deine gewünschten Songs aus:");
 
         renderSuggestionsList();
         suggestionsWrapper.classList.remove("hidden");
@@ -3530,10 +3523,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
           statusBox.innerHTML = `<span>❌ Fehler bei der Webrecherche: ${escapeHtml(err.message)}</span>`;
         }
       } finally {
-        searchBtn.disabled = false;
         if (singleBtn) singleBtn.disabled = false;
-        spinner.classList.add("hidden");
-        btnText.textContent = "🔍 10 Songs recherchieren";
       }
     }
 
@@ -3567,6 +3557,14 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
             
             <button type="button" onclick="event.stopPropagation(); generateSingleSuggestedSong(0)" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-stone-950 font-black rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg active:scale-95 transition">
               <span>✨ Diesen Song jetzt generieren & öffnen ↗</span>
+            </button>
+          </div>
+
+          <!-- Nachgelagerte Option: 10 alternative Songs recherchieren -->
+          <div class="pt-3 mt-1 flex items-center justify-between gap-2">
+            <span class="text-[11px] text-stone-400 font-medium">Nicht das richtige Lied?</span>
+            <button type="button" onclick="handleResearch10Songs(event)" class="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 border border-stone-700 hover:border-amber-500 text-amber-400 font-bold rounded-xl text-xs flex items-center gap-1.5 transition active:scale-95 shadow">
+              <span>🔍 10 alternative Songs recherchieren</span>
             </button>
           </div>
         `;
