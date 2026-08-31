@@ -356,7 +356,7 @@
   </div>
 
   <!-- ==================== AKKORDE AUSBLENDEN FRAGE-WIDGET ==================== -->
-  <div id="hideChordsConfirmModal" class="fixed inset-0 z-[150] bg-stone-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 select-none" onclick="closeHideChordsModal()">
+  <div id="hideChordsConfirmModal" class="fixed inset-0 z-[150] bg-stone-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 select-none" onclick="closeHideChordsModal(true)">
     <div class="relative max-w-sm w-full bg-stone-900 border-2 border-amber-500/80 rounded-2xl shadow-2xl p-5 text-stone-100 animate-scale-up text-center" onclick="event.stopPropagation()">
       <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 font-black flex items-center justify-center text-2xl mx-auto mb-3 shadow">
         🎸
@@ -367,7 +367,7 @@
       </p>
 
       <div class="flex items-center justify-center gap-2">
-        <button type="button" onclick="closeHideChordsModal()" class="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold rounded-xl text-xs flex-1 transition cursor-pointer">
+        <button type="button" onclick="closeHideChordsModal(true)" class="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold rounded-xl text-xs flex-1 transition cursor-pointer">
           Abbrechen
         </button>
         <button type="button" onclick="confirmHideChords()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black rounded-xl text-xs flex-1 transition shadow-lg active:scale-95 cursor-pointer">
@@ -2998,12 +2998,23 @@
       renderSongLyrics();
     }
 
+    let hideChordsDismissCount = parseInt(localStorage.getItem("singkreis_hide_chords_dismiss_count") || "0", 10);
+
     function askHideChords() {
+      if (hideChordsDismissCount >= 3) {
+        return; // Nach 3x Abbrechen nicht mehr anzeigen
+      }
       const modal = document.getElementById("hideChordsConfirmModal");
       if (modal) modal.classList.remove("hidden");
     }
 
-    function closeHideChordsModal() {
+    function closeHideChordsModal(isUserCancel = false) {
+      if (isUserCancel) {
+        hideChordsDismissCount++;
+        try {
+          localStorage.setItem("singkreis_hide_chords_dismiss_count", hideChordsDismissCount.toString());
+        } catch (e) {}
+      }
       const modal = document.getElementById("hideChordsConfirmModal");
       if (modal) modal.classList.add("hidden");
     }
@@ -3015,7 +3026,7 @@
         btn.textContent = "Chords: AUS";
         btn.className = "px-2.5 py-1 rounded-lg bg-stone-800 text-stone-400 font-bold text-xs";
       }
-      closeHideChordsModal();
+      closeHideChordsModal(false);
       renderSongLyrics();
       showToast("Akkorde ausgeblendet (Nur Text) 📝");
     }
