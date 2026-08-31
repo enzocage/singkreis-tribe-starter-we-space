@@ -171,28 +171,20 @@
         <button onclick="closeAddSongModal()" class="w-8 h-8 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white font-bold flex items-center justify-center transition">✕</button>
       </div>
 
-      <!-- Schritt 1: Eingabe für Recherche -->
+      <!-- Schritt 1: Ein einziges intuitives Suchfeld für Songtitel oder Interpret -->
       <form id="addSongForm" onsubmit="handleResearch10Songs(event)" class="space-y-3.5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300 mb-1">Songtitel (optional)</label>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-300 mb-1.5">Songtitel oder Interpret</label>
+          <div class="relative">
             <input 
               type="text" 
-              id="newSongTitle" 
-              placeholder="z.B. Knockin' on Heaven's Door..." 
-              class="w-full px-3.5 py-2.5 bg-stone-950 border border-stone-700 focus:border-amber-500 rounded-xl text-sm text-white placeholder-stone-500 font-medium focus:outline-none"
+              id="newSongSearchQuery" 
+              placeholder="z.B. Knockin' on Heaven's Door, Bob Dylan, Reinhard Fendrich..." 
+              class="w-full pl-3.5 pr-10 py-3 bg-stone-950 border border-stone-700 focus:border-amber-500 rounded-xl text-sm text-white placeholder-stone-500 font-medium focus:outline-none shadow-inner"
             >
+            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none text-base">🔍</span>
           </div>
-
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300 mb-1">Interpret / Band (optional)</label>
-            <input 
-              type="text" 
-              id="newSongArtist" 
-              placeholder="z.B. Reinhard Fendrich, Bob Dylan..." 
-              class="w-full px-3.5 py-2.5 bg-stone-950 border border-stone-700 focus:border-amber-500 rounded-xl text-sm text-white placeholder-stone-500 font-medium focus:outline-none"
-            >
-          </div>
+          <p class="text-[11px] text-stone-500 mt-1">Gib einen Songtitel, Künstler / Band oder ein Schlagwort ein.</p>
         </div>
 
         <!-- Recherche-Button & Subtiler Key-Link -->
@@ -2811,11 +2803,12 @@
       }
     }
 
-    async function openAddSongModal(presetTitle = "", presetArtist = "") {
+    async function openAddSongModal(presetQuery = "") {
       const modal = document.getElementById("addSongModal");
       if (!modal) return;
-      document.getElementById("newSongTitle").value = presetTitle;
-      document.getElementById("newSongArtist").value = presetArtist;
+      
+      const searchInput = document.getElementById("newSongSearchQuery");
+      if (searchInput) searchInput.value = presetQuery;
       
       const activeKey = await getActiveGeminiKey();
       const keyInput = document.getElementById("geminiApiKey");
@@ -2839,13 +2832,12 @@
 
       modal.classList.remove("hidden");
       setTimeout(() => {
-        if (!presetTitle) document.getElementById("newSongTitle").focus();
-        else document.getElementById("newSongArtist").focus();
+        if (searchInput) searchInput.focus();
       }, 50);
     }
 
     function openAddSongModalWithSearchQuery() {
-      openAddSongModal(searchQuery, "");
+      openAddSongModal(searchQuery);
     }
 
     function closeAddSongModal() {
@@ -2906,12 +2898,11 @@
 
     async function handleResearch10Songs(event) {
       if (event) event.preventDefault();
-      const title = document.getElementById("newSongTitle").value.trim();
-      const artist = document.getElementById("newSongArtist").value.trim();
-      const apiKeyInput = document.getElementById("geminiApiKey").value.trim();
+      const query = (document.getElementById("newSongSearchQuery")?.value || "").trim();
+      const apiKeyInput = document.getElementById("geminiApiKey")?.value?.trim();
 
-      if (!title && !artist) {
-        alert("Bitte gib mindestens einen Songtitel oder einen Interpreten ein.");
+      if (!query) {
+        alert("Bitte gib einen Songtitel oder Interpreten ein.");
         return;
       }
 
@@ -2935,7 +2926,7 @@
             Gratis Key in 10 Sekunden erstellen ↗
           </a>
         `;
-        document.getElementById("geminiApiKey").focus();
+        toggleApiKeyAccordion();
         return;
       }
 
@@ -2944,14 +2935,12 @@
       btnText.textContent = "Recherchiere 10 Songs...";
       suggestionsWrapper.classList.add("hidden");
 
-      const queryDesc = [title, artist].filter(Boolean).join(" - ");
-
       statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-amber-950/40 border-amber-600/60 text-amber-200 block";
-      statusBox.innerHTML = `<span>⏳ Gemini AI recherchiert 10 passende Songs für <strong>"${escapeHtml(queryDesc)}"</strong>...</span>`;
+      statusBox.innerHTML = `<span>⏳ Gemini AI recherchiert 10 passende Songs für <strong>"${escapeHtml(query)}"</strong>...</span>`;
 
       try {
         const promptText = `Du bist ein professioneller Musikexperte für Akustikgitarre, Lagerfeuer und Singkreis-Repertoire.
-Recherchiere genau 10 bekannte, beliebte und passende Songs zu der Suchanfrage: "${queryDesc}" (Künstler oder Songtitel/Genre), die sich hervorragend für Akustikgitarre & Singkreise eignen.
+Recherchiere genau 10 bekannte, beliebte und passende Songs zu der Suchanfrage: "${query}" (kann ein Songtitel, ein Interpret / Band oder ein Musikstil sein), die sich hervorragend für Akustikgitarre & Singkreise eignen.
 Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, ohne \`\`\`json Backticks):
 [
   {"title": "Songtitel 1", "artist": "Künstler 1", "year": 1982},
