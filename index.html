@@ -243,27 +243,14 @@
       <!-- Status- und Fehlermeldungen -->
       <div id="aiStatusBox" class="hidden my-3 p-3 rounded-xl text-xs font-medium border"></div>
 
-      <!-- Schritt 2: 10 Vorschläge Liste (Mehrfachauswahl möglich) -->
+      <!-- Schritt 2: Vorschläge Liste (Einzelauswahl) -->
       <div id="suggestionsWrapper" class="hidden mt-4 pt-4 border-t border-stone-800">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-xs font-black uppercase tracking-wider text-amber-400">Gefundene Titel (Mehrfachauswahl möglich):</p>
-          <div class="flex items-center gap-2 text-[11px]">
-            <button type="button" onclick="selectAllSuggestions(true)" class="text-stone-400 hover:text-white font-bold underline">Alle</button>
-            <span class="text-stone-600">•</span>
-            <button type="button" onclick="selectAllSuggestions(false)" class="text-stone-400 hover:text-white font-bold underline">Keine</button>
-          </div>
+        <div class="mb-2.5">
+          <p id="suggestionsHeaderTitle" class="text-xs font-black uppercase tracking-wider text-amber-400">Gefundene Titel (Klicke auf einen Song zum Generieren):</p>
         </div>
 
-        <div id="suggestionsList" class="max-h-60 overflow-y-auto space-y-1.5 pr-1 no-scrollbar">
+        <div id="suggestionsList" class="max-h-72 overflow-y-auto space-y-2 pr-1 no-scrollbar">
           <!-- Dynamisch gerendert -->
-        </div>
-
-        <div class="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-stone-800">
-          <span id="selectedCountDisplay" class="text-xs font-bold text-stone-400">0 ausgewählt</span>
-          <button type="button" id="generateBatchBtn" onclick="generateSelectedBatchSongs()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition disabled:opacity-50 disabled:pointer-events-none">
-            <span id="batchBtnSpinner" class="hidden animate-spin">🔄</span>
-            <span id="batchBtnText">✨ Ausgewählte Songs generieren</span>
-          </button>
         </div>
       </div>
 
@@ -3529,17 +3516,12 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
 
     function renderSuggestionsList() {
       const container = document.getElementById("suggestionsList");
-      const wrapper = document.getElementById("suggestionsWrapper");
-      const batchFooter = wrapper?.querySelector(".pt-3.border-t");
-      const headerTitle = wrapper?.querySelector("p.text-xs.font-black");
-      const headerControls = wrapper?.querySelector(".flex.items-center.gap-2.text-\\[11px\\]");
+      const headerTitle = document.getElementById("suggestionsHeaderTitle");
       if (!container) return;
 
       if (researchedSuggestions.length === 1) {
         // Einzelner gefundener Song Treffer
         if (headerTitle) headerTitle.textContent = "Passender Song gefunden:";
-        if (headerControls) headerControls.classList.add("hidden");
-        if (batchFooter) batchFooter.classList.add("hidden");
 
         const song = researchedSuggestions[0];
         container.innerHTML = `
@@ -3561,7 +3543,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
           </div>
 
           <!-- Nachgelagerte Option: 10 alternative Songs recherchieren -->
-          <div class="pt-3 mt-1 flex items-center justify-between gap-2">
+          <div class="pt-3 mt-1 flex items-center justify-between gap-2 border-t border-stone-800">
             <span class="text-[11px] text-stone-400 font-medium">Nicht das richtige Lied?</span>
             <button type="button" onclick="handleResearch10Songs(event)" class="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 border border-stone-700 hover:border-amber-500 text-amber-400 font-bold rounded-xl text-xs flex items-center gap-1.5 transition active:scale-95 shadow">
               <span>🔍 10 alternative Songs recherchieren</span>
@@ -3569,127 +3551,20 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
           </div>
         `;
       } else {
-        // 10 Songs Recherche
-        if (headerTitle) headerTitle.textContent = "Gefundene Titel (Mehrfachauswahl möglich):";
-        if (headerControls) headerControls.classList.remove("hidden");
-        if (batchFooter) batchFooter.classList.remove("hidden");
+        // 10 Songs Recherche (Jeder Song direkt einzeln anklickbar & generierbar)
+        if (headerTitle) headerTitle.textContent = "Wähle einen Song zum Generieren aus:";
 
         container.innerHTML = researchedSuggestions.map((song, idx) => `
-          <label class="flex items-center gap-3 p-2.5 bg-stone-950/80 hover:bg-stone-950 border border-stone-800 hover:border-amber-500/60 rounded-xl cursor-pointer transition select-none">
-            <input type="checkbox" data-idx="${idx}" class="suggestion-checkbox w-4 h-4 rounded text-amber-500 bg-stone-900 border-stone-700 focus:ring-amber-500 cursor-pointer" onchange="updateSelectedSuggestionsCount()">
+          <div onclick="generateSingleSuggestedSong(${idx})" class="flex items-center justify-between gap-3 p-3 bg-stone-950/80 hover:bg-stone-950 border border-stone-800 hover:border-emerald-500/70 rounded-xl cursor-pointer transition active:scale-[0.99] group shadow">
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-bold text-white leading-tight truncate">${escapeHtml(song.title)}</p>
-              <p class="text-xs text-stone-400 truncate">${escapeHtml(song.artist)} ${song.year ? `(${song.year})` : ''}</p>
+              <p class="text-sm font-bold text-white leading-tight truncate group-hover:text-emerald-300 transition">${escapeHtml(song.title)}</p>
+              <p class="text-xs text-stone-400 truncate mt-0.5">${escapeHtml(song.artist)} ${song.year ? `(${song.year})` : ''}</p>
             </div>
-            <button type="button" onclick="event.preventDefault(); generateSingleSuggestedSong(${idx})" class="px-2.5 py-1 bg-stone-900 hover:bg-amber-500 hover:text-stone-950 border border-stone-700 text-amber-400 text-[11px] font-bold rounded-lg transition shrink-0" title="Nur diesen Song direkt generieren">
-              Generieren ↗
+            <button type="button" onclick="event.stopPropagation(); generateSingleSuggestedSong(${idx})" class="px-3 py-1.5 bg-stone-900 group-hover:bg-gradient-to-r group-hover:from-emerald-500 group-hover:to-teal-600 group-hover:text-stone-950 border border-stone-700 group-hover:border-emerald-500 text-emerald-400 font-bold rounded-lg text-xs flex items-center gap-1 transition shrink-0 shadow">
+              <span>Generieren ↗</span>
             </button>
-          </label>
+          </div>
         `).join("");
-
-        updateSelectedSuggestionsCount();
-      }
-    }
-
-    function selectAllSuggestions(checked) {
-      const checkboxes = document.querySelectorAll(".suggestion-checkbox");
-      checkboxes.forEach(cb => cb.checked = checked);
-      updateSelectedSuggestionsCount();
-    }
-
-    function updateSelectedSuggestionsCount() {
-      const checked = document.querySelectorAll(".suggestion-checkbox:checked");
-      const count = checked.length;
-      document.getElementById("selectedCountDisplay").textContent = `${count} von ${researchedSuggestions.length} ausgewählt`;
-      
-      const batchBtn = document.getElementById("generateBatchBtn");
-      batchBtn.disabled = (count === 0);
-      document.getElementById("batchBtnText").textContent = count > 0 
-        ? `✨ ${count} ausgewählte Song${count > 1 ? 's' : ''} generieren` 
-        : "✨ Ausgewählte Songs generieren";
-    }
-
-    async function generateSelectedBatchSongs() {
-      const checkedBoxes = Array.from(document.querySelectorAll(".suggestion-checkbox:checked"));
-      if (checkedBoxes.length === 0) return;
-
-      const selectedSongs = checkedBoxes.map(cb => researchedSuggestions[parseInt(cb.getAttribute("data-idx"))]);
-      const savedKey = await getActiveGeminiKey();
-      if (!savedKey) return;
-
-      const statusBox = document.getElementById("aiStatusBox");
-      const batchBtn = document.getElementById("generateBatchBtn");
-      const spinner = document.getElementById("batchBtnSpinner");
-      const btnText = document.getElementById("batchBtnText");
-
-      batchBtn.disabled = true;
-      spinner.classList.remove("hidden");
-
-      let successCount = 0;
-      let lastGeneratedId = null;
-
-      const progress = showAiProgressBar("✨ Generiere ausgewählte Songs...", `Song 1 von ${selectedSongs.length}: "${selectedSongs[0].title}"`);
-
-      for (let i = 0; i < selectedSongs.length; i++) {
-        const item = selectedSongs[i];
-        btnText.textContent = `Generiere ${i + 1}/${selectedSongs.length}...`;
-        const basePct = Math.floor((i / selectedSongs.length) * 100);
-        if (progress) progress.update(basePct, `Generiere (${i + 1}/${selectedSongs.length}): "${item.title}" (${item.artist})...`);
-
-        try {
-          const promptText = `Du bist ein professioneller Musikexperte für Akustikgitarre, Lagerfeuer und Singkreis-Repertoire.
-Erstelle für den Song "${item.title}" von "${item.artist}" den vollständigen Liedtext inklusive präziser Gitarren-Akkorde für Akustikgitarre.
-Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt (ohne Markdown, ohne \`\`\`json Backticks):
-{
-  "title": "${item.title}",
-  "artist": "${item.artist}",
-  "year": ${item.year || 1985},
-  "lang": "DE",
-  "originalKey": "G",
-  "tempo": 85,
-  "message": "Kurze 1-Satz Kernaussage oder Stimmung auf Deutsch.",
-  "content": "[Strophe 1]\\nG           C\\nErste Textzeile...\\n\\n[Refrain]\\n..."
-}
-WICHTIG für "content":
-- Verwende Abschnitts-Tags wie [Strophe 1], [Refrain], [Strophe 2], [Brücke], [Outro].
-- Setze die Akkorde in eigene Zeilen DIREKT ÜBER die zugehörigen Textzeilen.
-- Verwende gängige Standard-Akkorde (z.B. G, Em, C, D, Am, F, A7, Cadd9, D/F#).
-- Der Text muss vollständig und singbar sein.`;
-
-          const generated = await callGeminiFlashAPI(promptText, savedKey);
-          if (generated) {
-            generated.id = "comm-" + Date.now() + "-" + i;
-            generated.isCommunity = true;
-            if (!generated.originalKey) generated.originalKey = "G";
-            if (!generated.tempo) generated.tempo = 80;
-            if (!generated.lang) generated.lang = "DE";
-            if (!generated.year) generated.year = item.year || new Date().getFullYear();
-
-            saveCommunitySong(generated);
-            lastGeneratedId = generated.id;
-            successCount++;
-          }
-        } catch (e) {
-          console.error("Fehler bei Song", item.title, e);
-        }
-      }
-
-      spinner.classList.add("hidden");
-      batchBtn.disabled = false;
-      btnText.textContent = "✨ Ausgewählte Songs generieren";
-
-      if (successCount > 0) {
-        if (progress) progress.complete(`🎉 ${successCount} Song${successCount > 1 ? 's wurden' : ' wurde'} erfolgreich generiert!`);
-        
-        setTimeout(() => {
-          closeAddSongModal();
-          renderSongList();
-          showToast(`${successCount} Song${successCount > 1 ? 's' : ''} zur Community hinzugefügt! ✨`);
-          if (lastGeneratedId) openSongModal(lastGeneratedId);
-        }, 900);
-      } else {
-        statusBox.className = "p-3 rounded-xl text-xs font-medium border bg-rose-950/80 border-rose-500 text-rose-200 block";
-        statusBox.innerHTML = `<span>❌ Es konnten keine Songs generiert werden. Bitte API-Key prüfen.</span>`;
       }
     }
 
