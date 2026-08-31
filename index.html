@@ -1928,34 +1928,27 @@
     }
 
     // ==================== FIREBASE CLOUD-SYNC (REALTIME FIRESTORE) ====================
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCAAFPJuClH1V8tqWVS6PM9N2hUjAyD3zg",
+      authDomain: "singkreis-7217f.firebaseapp.com",
+      projectId: "singkreis-7217f",
+      storageBucket: "singkreis-7217f.firebasestorage.app",
+      messagingSenderId: "301737475852",
+      appId: "1:301737475852:web:1191929f3c8d7db91d9329"
+    };
+
     let firebaseDb = null;
     let firebaseCommunitySongs = [];
     let isCloudSyncActive = false;
 
     async function initFirebaseSync() {
-      let fbConfig = null;
+      let fbConfig = DEFAULT_FIREBASE_CONFIG;
       try {
         const stored = localStorage.getItem("singkreis_firebase_config");
         if (stored) fbConfig = JSON.parse(stored);
       } catch (e) {}
 
-      if (!fbConfig) {
-        try {
-          const res = await fetch('.env');
-          if (res.ok) {
-            const text = await res.text();
-            const apiKey = (text.match(/^FIREBASE_API_KEY\s*=\s*(.+)$/m) || [])[1]?.trim();
-            const projectId = (text.match(/^FIREBASE_PROJECT_ID\s*=\s*(.+)$/m) || [])[1]?.trim();
-            const appId = (text.match(/^FIREBASE_APP_ID\s*=\s*(.+)$/m) || [])[1]?.trim();
-            if (projectId && apiKey) {
-              fbConfig = { apiKey, projectId, appId: appId || "" };
-            }
-          }
-        } catch (e) {}
-      }
-
       if (!fbConfig || !fbConfig.projectId) {
-        // Standardmäßig im lokalen Modus
         updateFirebaseStatusUI(false, "Offline (Lokal auf diesem Gerät)");
         return;
       }
