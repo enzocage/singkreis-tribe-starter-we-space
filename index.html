@@ -3189,7 +3189,7 @@
       if (bright) {
         // Zunächst voll sichtbar (100%) bei Interaktion
         widget.style.opacity = "1";
-        // Nach 2 Sekunden permanent auf dezente 20% Transparenz dimmen
+        // Nach 5 Sekunden permanent auf dezente 20% Transparenz dimmen
         scrollSpeedWidgetTimer = setTimeout(() => {
           if (isAutoScrolling) {
             widget.style.opacity = "0.20"; // 20% Transparenz
@@ -3197,7 +3197,7 @@
             widget.style.opacity = "0";
             widget.style.pointerEvents = "none";
           }
-        }, 2000);
+        }, 5000);
       } else {
         widget.style.opacity = isAutoScrolling ? "0.20" : "0";
       }
