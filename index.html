@@ -322,15 +322,25 @@
             <span class="text-stone-500">Kostenlos im Free-Tier</span>
           </div>
 
-          <div class="flex items-center justify-end gap-2 pt-3 border-t border-stone-800">
-            <button type="button" onclick="closeFirebaseConfigModal()" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold rounded-xl text-xs">
-              Schließen
+          <div class="pt-2 flex flex-wrap items-center justify-between gap-2 border-t border-stone-800">
+            <button type="button" id="testFbBtn" onclick="testFirebaseConnection()" class="px-3.5 py-2 bg-stone-800 hover:bg-stone-700 text-emerald-400 font-bold rounded-xl text-xs flex items-center gap-1.5 transition active:scale-95 border border-emerald-500/30">
+              <span>📡 Verbindung jetzt testen</span>
             </button>
-            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-stone-950 font-black rounded-xl text-xs shadow-lg active:scale-95 transition">
-              💾 Verbinden & Speichern
-            </button>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="closeFirebaseConfigModal()" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold rounded-xl text-xs">
+                Schließen
+              </button>
+              <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-stone-950 font-black rounded-xl text-xs shadow-lg active:scale-95 transition">
+                💾 Speichern
+              </button>
+            </div>
           </div>
         </form>
+
+        <div class="mt-2 p-2.5 bg-stone-950/80 rounded-xl border border-stone-800 text-[11px] text-stone-400">
+          <p class="font-bold text-stone-300 mb-0.5">💡 Firestore-Sicherheitsregel (Einmalig in Firebase Konsole):</p>
+          <code class="text-[10px] text-emerald-300 block bg-stone-900 p-1.5 rounded mt-1 font-mono">allow read, write: if true;</code>
+        </div>
 
       </div>
 
@@ -1980,9 +1990,8 @@
           }
           firebaseDb = firebase.firestore();
 
-          // Realtime Snapshot Listener auf die Collection 'community_songs'
+          // Realtime Snapshot Listener auf die Collection 'community_songs' (ohne Index-Zwang)
           firebaseDb.collection("community_songs")
-            .orderBy("createdAt", "desc")
             .onSnapshot(snapshot => {
               const liveSongs = [];
               snapshot.forEach(doc => {
@@ -1991,6 +2000,8 @@
                 data.isCommunity = true;
                 liveSongs.push(data);
               });
+
+              liveSongs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
               firebaseCommunitySongs = liveSongs;
               isCloudSyncActive = true;
@@ -2002,16 +2013,22 @@
 
               renderSongList();
             }, err => {
-              console.warn("Firebase Live-Sync:", err.message);
+              console.error("Firebase Live-Sync Fehler:", err);
               isCloudSyncActive = false;
-              updateFirebaseStatusUI(false, "Offline (Lokal gespeichert)");
+              let msg = err.message || "";
+              if (msg.includes("permission-denied") || msg.includes("PERMISSION_DENIED")) {
+                msg = "Sicherheitsregel fehlt (allow read, write: if true;)";
+              } else if (msg.includes("failed-precondition")) {
+                msg = "Firestore noch nicht in Firebase-Konsole erstellt";
+              }
+              updateFirebaseStatusUI(false, `Fehler: ${msg}`);
               renderSongList();
             });
         }
       } catch (err) {
-        console.warn("Firebase init:", err.message);
+        console.error("Firebase Init Fehler:", err);
         isCloudSyncActive = false;
-        updateFirebaseStatusUI(false, "Offline (Lokal gespeichert)");
+        updateFirebaseStatusUI(false, `Fehler: ${err.message}`);
       }
     }
 
@@ -2024,13 +2041,48 @@
       }
     }
 
+    async function testFirebaseConnection() {
+      const btn = document.getElementById("testFbBtn");
+      if (btn) btn.disabled = true;
+      try {
+        if (!firebaseDb) {
+          await initFirebaseSync();
+        }
+        if (!firebaseDb) throw new Error("Firebase ist nicht initialisiert.");
+
+        const testId = "test-live-" + Date.now();
+        const cleanDoc = {
+          id: testId,
+          title: "🎵 Cloud-Sync Live Test",
+          artist: "Firebase Live",
+          year: new Date().getFullYear(),
+          lang: "DE",
+          originalKey: "G",
+          tempo: 80,
+          message: "Dieser Test-Song bestätigt, dass die Cloud-Synchronisation für alle Mitsänger funktioniert!",
+          content: "[Refrain]\nG           C\nCloud-Sync funktioniert einwandfrei!\nG           D           G\nAlle Mitsänger sehen dieses Lied live!",
+          createdAt: Date.now(),
+          isCommunity: true
+        };
+
+        await firebaseDb.collection("community_songs").doc(testId).set(cleanDoc);
+        showToast("✅ Verbindung erfolgreich! Test-Song synchronisiert.");
+        updateFirebaseStatusUI(true, "Live Cloud-Sync aktiv (Verbindung erfolgreich!)");
+      } catch (e) {
+        alert("❌ Firebase-Verbindung:\n\n" + e.message + "\n\nBitte prüfe in der Firebase-Konsole:\n1. Ist unter 'Firestore-Datenbank' eine Datenbank erstellt?\n2. Steht unter 'Regeln' (Rules) 'allow read, write: if true;'?");
+        updateFirebaseStatusUI(false, `Fehler: ${e.message}`);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
     function openFirebaseConfigModal() {
       const modal = document.getElementById("firebaseConfigModal");
       if (!modal) return;
       try {
         const stored = JSON.parse(localStorage.getItem("singkreis_firebase_config") || "{}");
-        if (stored.projectId) document.getElementById("fbProjectId").value = stored.projectId;
-        if (stored.apiKey) document.getElementById("fbApiKey").value = stored.apiKey;
+        document.getElementById("fbProjectId").value = stored.projectId || DEFAULT_FIREBASE_CONFIG.projectId;
+        document.getElementById("fbApiKey").value = stored.apiKey || DEFAULT_FIREBASE_CONFIG.apiKey;
       } catch(e) {}
       modal.classList.remove("hidden");
     }
