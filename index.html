@@ -3209,15 +3209,15 @@
       if (bright) {
         // Zunächst voll sichtbar (100%) bei Interaktion
         widget.style.opacity = "1";
-        // Nach 5 Sekunden permanent auf dezente 20% Transparenz dimmen
+        // Nach 2 Sekunden ohne User-Interaktion auf 80% Transparenz (20% Deckkraft) ausfaden
         scrollSpeedWidgetTimer = setTimeout(() => {
           if (isAutoScrolling) {
-            widget.style.opacity = "0.20"; // 20% Transparenz
+            widget.style.opacity = "0.20"; // 80% Transparenz / 20% Deckkraft
           } else {
             widget.style.opacity = "0";
             widget.style.pointerEvents = "none";
           }
-        }, 5000);
+        }, 2000);
       } else {
         widget.style.opacity = isAutoScrolling ? "0.20" : "0";
       }
