@@ -8,6 +8,9 @@
   <link rel="apple-touch-icon" href="singkreis.jpg">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDK für globale Echtzeit-Synchronisation -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -241,6 +244,74 @@
             <span id="batchBtnText">✨ Ausgewählte Songs generieren</span>
           </button>
         </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== FIREBASE CLOUD-SYNC MODAL ==================== -->
+  <div id="firebaseConfigModal" class="fixed inset-0 z-[130] bg-stone-950/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto" onclick="closeFirebaseConfigModal()">
+    <div class="relative max-w-md w-full bg-stone-900 border border-stone-700 rounded-2xl shadow-2xl p-5 sm:p-6 text-stone-100 animate-scale-up my-6" onclick="event.stopPropagation()">
+      
+      <div class="flex items-center justify-between border-b border-stone-800 pb-3 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 text-stone-950 font-black flex items-center justify-center text-lg shadow">🌐</div>
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-white leading-tight">Cloud-Echtzeit-Sync</h2>
+            <p class="text-[11px] text-emerald-400 font-medium">Lieder live für alle Mitsänger synchronisieren</p>
+          </div>
+        </div>
+        <button onclick="closeFirebaseConfigModal()" class="w-8 h-8 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white font-bold flex items-center justify-center transition">✕</button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <p class="text-stone-300 leading-relaxed">
+          Mit Google Firebase Firestore werden alle neu erstellten Community-Songs <strong>in derselben Sekunde</strong> auf den Smartphones aller anderen Teilnehmer sichtbar.
+        </p>
+
+        <div id="firebaseStatusBanner" class="p-3 rounded-xl border bg-stone-950 border-stone-800 flex items-center gap-2.5">
+          <span id="firebaseStatusDot" class="w-3 h-3 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+          <span id="firebaseStatusText" class="text-stone-300 font-semibold">Status: Offline (Lokal gespeichert)</span>
+        </div>
+
+        <form id="firebaseConfigForm" onsubmit="saveFirebaseConfigFromModal(event)" class="space-y-3 pt-1">
+          <div>
+            <label class="block font-bold text-stone-300 uppercase tracking-wider text-[11px] mb-1">Firebase Project ID *</label>
+            <input 
+              type="text" 
+              id="fbProjectId" 
+              placeholder="z.B. singkreis-community" 
+              class="w-full px-3 py-2 bg-stone-950 border border-stone-700 focus:border-emerald-500 rounded-xl text-xs text-white placeholder-stone-600 font-medium focus:outline-none"
+            >
+          </div>
+
+          <div>
+            <label class="block font-bold text-stone-300 uppercase tracking-wider text-[11px] mb-1">Firebase Web API Key *</label>
+            <input 
+              type="password" 
+              id="fbApiKey" 
+              placeholder="AIzaSy..." 
+              class="w-full px-3 py-2 bg-stone-950 border border-stone-700 focus:border-emerald-500 rounded-xl text-xs text-white placeholder-stone-600 font-medium focus:outline-none"
+            >
+          </div>
+
+          <div class="pt-1 flex items-center justify-between text-[11px]">
+            <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">
+              Gratis Firebase-Projekt erstellen ↗
+            </a>
+            <span class="text-stone-500">Kostenlos im Free-Tier</span>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-stone-800">
+            <button type="button" onclick="closeFirebaseConfigModal()" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold rounded-xl text-xs">
+              Schließen
+            </button>
+            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-stone-950 font-black rounded-xl text-xs shadow-lg active:scale-95 transition">
+              💾 Verbinden & Speichern
+            </button>
+          </div>
+        </form>
+
       </div>
 
     </div>
@@ -1856,10 +1927,126 @@
       });
     }
 
+    // ==================== FIREBASE CLOUD-SYNC (REALTIME FIRESTORE) ====================
+    let firebaseDb = null;
+    let firebaseCommunitySongs = [];
+    let isCloudSyncActive = false;
+
+    async function initFirebaseSync() {
+      let fbConfig = null;
+      try {
+        const stored = localStorage.getItem("singkreis_firebase_config");
+        if (stored) fbConfig = JSON.parse(stored);
+      } catch (e) {}
+
+      if (!fbConfig) {
+        try {
+          const res = await fetch('.env');
+          if (res.ok) {
+            const text = await res.text();
+            const apiKey = (text.match(/^FIREBASE_API_KEY\s*=\s*(.+)$/m) || [])[1]?.trim();
+            const projectId = (text.match(/^FIREBASE_PROJECT_ID\s*=\s*(.+)$/m) || [])[1]?.trim();
+            const appId = (text.match(/^FIREBASE_APP_ID\s*=\s*(.+)$/m) || [])[1]?.trim();
+            if (projectId && apiKey) {
+              fbConfig = { apiKey, projectId, appId: appId || "" };
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (!fbConfig || !fbConfig.projectId) {
+        // Standardmäßig im lokalen Modus
+        updateFirebaseStatusUI(false, "Offline (Lokal auf diesem Gerät)");
+        return;
+      }
+
+      try {
+        if (typeof firebase !== 'undefined' && fbConfig && fbConfig.projectId) {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(fbConfig);
+          }
+          firebaseDb = firebase.firestore();
+
+          // Realtime Snapshot Listener auf die Collection 'community_songs'
+          firebaseDb.collection("community_songs")
+            .orderBy("createdAt", "desc")
+            .onSnapshot(snapshot => {
+              const liveSongs = [];
+              snapshot.forEach(doc => {
+                const data = doc.data();
+                data.id = doc.id;
+                data.isCommunity = true;
+                liveSongs.push(data);
+              });
+
+              firebaseCommunitySongs = liveSongs;
+              isCloudSyncActive = true;
+              updateFirebaseStatusUI(true, `Live Cloud-Sync aktiv (${liveSongs.length} geteilte Lieder)`);
+              
+              try {
+                localStorage.setItem("singkreis_community_songs", JSON.stringify(liveSongs));
+              } catch(e) {}
+
+              renderSongList();
+            }, err => {
+              console.warn("Firebase Live-Sync:", err.message);
+              isCloudSyncActive = false;
+              updateFirebaseStatusUI(false, "Offline (Lokal gespeichert)");
+              renderSongList();
+            });
+        }
+      } catch (err) {
+        console.warn("Firebase init:", err.message);
+        isCloudSyncActive = false;
+        updateFirebaseStatusUI(false, "Offline (Lokal gespeichert)");
+      }
+    }
+
+    function updateFirebaseStatusUI(active, text) {
+      const dot = document.getElementById("firebaseStatusDot");
+      const statusText = document.getElementById("firebaseStatusText");
+      if (dot && statusText) {
+        dot.className = active ? "w-3 h-3 rounded-full bg-emerald-500 shrink-0" : "w-3 h-3 rounded-full bg-amber-500 shrink-0";
+        statusText.textContent = `Status: ${text}`;
+      }
+    }
+
+    function openFirebaseConfigModal() {
+      const modal = document.getElementById("firebaseConfigModal");
+      if (!modal) return;
+      try {
+        const stored = JSON.parse(localStorage.getItem("singkreis_firebase_config") || "{}");
+        if (stored.projectId) document.getElementById("fbProjectId").value = stored.projectId;
+        if (stored.apiKey) document.getElementById("fbApiKey").value = stored.apiKey;
+      } catch(e) {}
+      modal.classList.remove("hidden");
+    }
+
+    function closeFirebaseConfigModal() {
+      const modal = document.getElementById("firebaseConfigModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function saveFirebaseConfigFromModal(e) {
+      e.preventDefault();
+      const projectId = document.getElementById("fbProjectId").value.trim();
+      const apiKey = document.getElementById("fbApiKey").value.trim();
+      if (!projectId || !apiKey) {
+        alert("Bitte Projekt-ID und API-Key eingeben.");
+        return;
+      }
+      const config = { projectId, apiKey };
+      localStorage.setItem("singkreis_firebase_config", JSON.stringify(config));
+      showToast("Firebase Cloud-Sync gespeichert! Starte neu...");
+      closeFirebaseConfigModal();
+      setTimeout(() => location.reload(), 500);
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       applyDarkModeUI();
       renderSongList();
       updateFavCount();
+      initFirebaseSync();
 
       // 1 Sekunde groß anzeigen beim Starten der App
       setTimeout(() => {
@@ -1874,6 +2061,9 @@
     });
 
     function getCommunitySongs() {
+      if (firebaseCommunitySongs.length > 0) {
+        return firebaseCommunitySongs;
+      }
       try {
         return JSON.parse(localStorage.getItem("singkreis_community_songs") || "[]");
       } catch (e) {
@@ -1881,17 +2071,39 @@
       }
     }
 
-    function saveCommunitySong(song) {
-      const comm = getCommunitySongs();
+    async function saveCommunitySong(song) {
+      if (!song.createdAt) song.createdAt = Date.now();
+      song.isCommunity = true;
+
+      const comm = getCommunitySongs().filter(s => s.id !== song.id);
       comm.unshift(song);
+      firebaseCommunitySongs = comm;
       localStorage.setItem("singkreis_community_songs", JSON.stringify(comm));
+
+      if (firebaseDb) {
+        try {
+          await firebaseDb.collection("community_songs").doc(song.id).set(song);
+        } catch (e) {
+          console.warn("Cloud save:", e.message);
+        }
+      }
     }
 
-    function deleteCommunitySong(id) {
+    async function deleteCommunitySong(id) {
       if (!confirm("Diesen Community-Song wirklich entfernen?")) return;
-      let comm = getCommunitySongs();
-      comm = comm.filter(s => s.id !== id);
+      
+      let comm = getCommunitySongs().filter(s => s.id !== id);
+      firebaseCommunitySongs = comm;
       localStorage.setItem("singkreis_community_songs", JSON.stringify(comm));
+
+      if (firebaseDb) {
+        try {
+          await firebaseDb.collection("community_songs").doc(id).delete();
+        } catch (e) {
+          console.warn("Cloud delete:", e.message);
+        }
+      }
+
       showToast("Community-Song entfernt");
       renderSongList();
     }
@@ -1947,16 +2159,22 @@
       if (allComm.length > 0 || communitySongs.length > 0) {
         html += `
           <div class="mt-10 pt-6 border-t-2 border-dashed border-stone-800">
-            <div class="flex items-center justify-between mb-3 px-1">
+            <div class="flex items-center justify-between mb-3 px-1 flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <span class="px-2.5 py-0.5 rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/40 text-purple-300 font-black text-xs uppercase tracking-wider flex items-center gap-1">
                   <span>👥</span> Community Songs
                 </span>
                 <span class="text-xs text-stone-400 font-bold">(${communitySongs.length})</span>
+                <button onclick="openFirebaseConfigModal()" class="px-2 py-0.5 rounded-full ${isCloudSyncActive ? 'bg-emerald-950 border border-emerald-500 text-emerald-300' : 'bg-stone-900 border border-stone-700 text-stone-400'} text-[10px] font-bold flex items-center gap-1 hover:border-amber-400 transition" title="Cloud-Synchronisation einstellen">
+                  <span class="w-1.5 h-1.5 rounded-full ${isCloudSyncActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}"></span>
+                  <span>${isCloudSyncActive ? 'Live Cloud-Sync' : 'Cloud-Sync'}</span>
+                </button>
               </div>
-              <button onclick="openAddSongModal()" class="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition">
-                <span>+ Song hinzufügen</span>
-              </button>
+              <div class="flex items-center gap-2">
+                <button onclick="openAddSongModal()" class="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition">
+                  <span>+ Song hinzufügen</span>
+                </button>
+              </div>
             </div>
             ${communitySongs.length > 0 
               ? `<div class="space-y-2.5">${communitySongs.map(song => renderSongCardHtml(song, true)).join("")}</div>`
@@ -1968,9 +2186,14 @@
         html += `
           <div class="mt-10 pt-6 border-t-2 border-dashed border-stone-800 text-center py-4">
             <p class="text-xs text-stone-400 mb-2">Fehlt dir ein Lieblingslied?</p>
-            <button onclick="openAddSongModal()" class="px-4 py-2 bg-stone-900 hover:bg-stone-800 border border-amber-500/40 text-amber-400 font-bold rounded-xl text-xs inline-flex items-center gap-1.5 transition active:scale-95 shadow">
-              <span>✨ Eigenen Song mit AI hinzufügen</span>
-            </button>
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              <button onclick="openAddSongModal()" class="px-4 py-2 bg-stone-900 hover:bg-stone-800 border border-amber-500/40 text-amber-400 font-bold rounded-xl text-xs inline-flex items-center gap-1.5 transition active:scale-95 shadow">
+                <span>✨ Eigenen Song mit AI hinzufügen</span>
+              </button>
+              <button onclick="openFirebaseConfigModal()" class="px-3 py-2 bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-300 font-bold rounded-xl text-xs inline-flex items-center gap-1 transition">
+                <span>🌐 Cloud-Sync</span>
+              </button>
+            </div>
           </div>
         `;
       }

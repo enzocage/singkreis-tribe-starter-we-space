@@ -26,7 +26,10 @@ function isChordLine(line) {
   return (chordCount / tokens.length) >= 0.75 && chordCount >= 1;
 }
 
-// Full list of 122 songs
+// Community Songs (werden über add_song.js oder Web-Export ergänzt)
+const communitySongs = [];
+
+// Standard Repertoire (122 Lieder)
 const songs = [
   {
     "id": "lean-on-me",
@@ -1372,10 +1375,11 @@ const songs = [
   }
 ];
 
-console.log('Total songs:', songs.length);
+const allSongs = [...communitySongs, ...songs];
+console.log('Total songs:', allSongs.length, `(${songs.length} Standard, ${communitySongs.length} Community)`);
 
 // Validation
-songs.forEach((s, idx) => {
+allSongs.forEach((s, idx) => {
   if (!s.id || !s.title || !s.artist || !s.originalKey || !s.tempo || !s.message || !s.content) {
     console.error('Song #' + (idx+1) + ' (' + s.title + ') is missing required fields!');
   }
@@ -1392,10 +1396,10 @@ const startIdx = htmlContent.indexOf(startTag);
 const endIdx = htmlContent.indexOf(endTag);
 
 if (startIdx !== -1 && endIdx !== -1) {
-  const newSongsStr = 'const SONGS = ' + JSON.stringify(songs, null, 2) + ';\n\n';
+  const newSongsStr = 'const SONGS = ' + JSON.stringify(allSongs, null, 2) + ';\n\n';
   htmlContent = htmlContent.substring(0, startIdx) + newSongsStr + htmlContent.substring(endIdx);
   fs.writeFileSync(htmlPath, htmlContent, 'utf8');
-  console.log('Successfully updated index.html with ' + songs.length + ' songs!');
+  console.log('Successfully updated index.html with ' + allSongs.length + ' songs!');
 } else {
   console.error('Could not find slice boundaries in index.html');
 }
