@@ -2553,6 +2553,57 @@
       if (modal) modal.classList.add("hidden");
     }
 
+    // Robuste Gemini-API-Funktion mit Unterstützung für gemini-3.6-flash und automatischem Fallback
+    async function callGeminiFlashAPI(promptText, savedKey) {
+      const models = [
+        "gemini-3.6-flash",
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash"
+      ];
+      let lastError = null;
+
+      for (const model of models) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${savedKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }],
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.2
+              }
+            })
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            const errMsg = errData?.error?.message || `API Fehler (${response.status})`;
+            if (errMsg.includes("no longer available") || errMsg.includes("not found") || response.status === 404) {
+              lastError = new Error(errMsg);
+              continue;
+            }
+            throw new Error(errMsg);
+          }
+
+          const resData = await response.json();
+          const rawJson = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawJson) throw new Error("Keine Antwort von Gemini erhalten.");
+
+          const cleaned = rawJson.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+          return JSON.parse(cleaned);
+        } catch (err) {
+          lastError = err;
+          if (err.message && (err.message.includes("no longer available") || err.message.includes("not found"))) {
+            continue;
+          }
+          throw err;
+        }
+      }
+      throw lastError || new Error("Kein kompatibles Gemini-Modell gefunden.");
+    }
+
     async function handleResearch10Songs(event) {
       if (event) event.preventDefault();
       const title = document.getElementById("newSongTitle").value.trim();
@@ -2607,29 +2658,7 @@ Antworte AUSSCHLIESSLICH als valides JSON-Array mit 10 Objekten (ohne Markdown, 
   {"title": "Songtitel 2", "artist": "Künstler 2", "year": 1995}
 ]`;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${savedKey}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: {
-              responseMimeType: "application/json",
-              temperature: 0.2
-            }
-          })
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData?.error?.message || `API Fehler (${response.status})`);
-        }
-
-        const resData = await response.json();
-        const rawJson = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!rawJson) throw new Error("Keine Antwort von Gemini erhalten.");
-
-        const cleaned = rawJson.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-        researchedSuggestions = JSON.parse(cleaned);
+        researchedSuggestions = await callGeminiFlashAPI(promptText, savedKey);
 
         if (!Array.isArray(researchedSuggestions) || researchedSuggestions.length === 0) {
           throw new Error("Ungültiges Listenformat von Gemini erhalten.");
@@ -2731,35 +2760,18 @@ WICHTIG für "content":
 - Verwende gängige Standard-Akkorde (z.B. G, Em, C, D, Am, F, A7, Cadd9, D/F#).
 - Der Text muss vollständig und singbar sein.`;
 
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${savedKey}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: promptText }] }],
-              generationConfig: {
-                responseMimeType: "application/json",
-                temperature: 0.2
-              }
-            })
-          });
+          const generated = await callGeminiFlashAPI(promptText, savedKey);
+          if (generated) {
+            generated.id = "comm-" + Date.now() + "-" + i;
+            generated.isCommunity = true;
+            if (!generated.originalKey) generated.originalKey = "G";
+            if (!generated.tempo) generated.tempo = 80;
+            if (!generated.lang) generated.lang = "DE";
+            if (!generated.year) generated.year = item.year || new Date().getFullYear();
 
-          if (response.ok) {
-            const resData = await response.json();
-            const rawJson = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (rawJson) {
-              const cleaned = rawJson.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-              const generated = JSON.parse(cleaned);
-              generated.id = "comm-" + Date.now() + "-" + i;
-              generated.isCommunity = true;
-              if (!generated.originalKey) generated.originalKey = "G";
-              if (!generated.tempo) generated.tempo = 80;
-              if (!generated.lang) generated.lang = "DE";
-              if (!generated.year) generated.year = item.year || new Date().getFullYear();
-
-              saveCommunitySong(generated);
-              lastGeneratedId = generated.id;
-              successCount++;
-            }
+            saveCommunitySong(generated);
+            lastGeneratedId = generated.id;
+            successCount++;
           }
         } catch (e) {
           console.error("Fehler bei Song", item.title, e);
